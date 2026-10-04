@@ -9,12 +9,12 @@
   font-size: 14px; line-height: 1.45; color: var(--ink);
 }
 .ipm .card h3 { text-transform: none; letter-spacing: -.01em; font-size: 15px; }
-.ipm .nav { position: sticky; top: 0; background: var(--bg); border-radius: 0; margin: 0 -40px 14px; padding: 8px 40px; }
+.ipm .nav { position: sticky; top: 0; z-index: 20; background: var(--bg); border-radius: 0; margin: 0 0 14px; padding: 8px 0; }
 .ipm .syncchip.err { background: var(--red-100); color: var(--red); } .ipm .syncchip.err .dot { background: var(--red); }
 .ipm .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin-right: 6px; }
 .ipm .lang button { border: 0; border-radius: 0; padding: 5px 10px; }
 .ipm .lang button.on { background: var(--jet); color: var(--canary); }
-@media (max-width: 860px) { .ipm .nav { margin: 0 -16px 14px; padding: 8px 16px; } }
+@media (max-width: 860px) { .ipm .nav { top: 46px; } }
 /* neutralizza le regole globali td-cash che toccherebbero il motore */
 .ipm h3 { text-transform: none; letter-spacing: -.01em; }
 .ipm .badge { display: inline-block; } .ipm .badge::before { content: none; }
@@ -24,7 +24,7 @@
 .ipm input, .ipm select { min-height: 0; width: auto; }
 .ipm .fld input, .ipm .fld select, .ipm .fld textarea { width: 100%; }
 @page { size: A4 landscape; margin: 8mm; }
-.ipm .nav {position: sticky; top: 0; z-index: 60; background: var(--paper); border-bottom: 1px solid var(--line);
+.ipm .nav {position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line);
   display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; overflow-x: auto; align-items: center; }
 .ipm .nav button {border: 1px solid var(--line); background: #fff; color: var(--ink-2); font-weight: 680;
   padding: 6px 13px; border-radius: 999px; cursor: pointer; font-size: 12.5px; font-family: inherit; white-space: nowrap; }
