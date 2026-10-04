@@ -1,0 +1,48 @@
+# Deploy su Render: New > Blueprint > collega il repository tdintegration/td-integration.
+# Piani a pagamento (come td-cash): app sempre accesa, SSE stabili, database persistente con backup.
+services:
+  - type: web
+    name: td-integration
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: BASE_URL
+        value: https://td-integration.onrender.com   # poi https://integration.toscanadiagnostica.it (Custom Domain + CNAME)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: td-integration-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SESSION_HOURS
+        value: "10"
+      - key: SEED_ADMIN_EMAIL
+        value: francesco.epifani@toscanadiagnostica.it
+      - key: SEED_ADMIN_NAME
+        value: Francesco Epifani
+      - key: SEED_ADMIN_PASSWORD
+        sync: false   # facoltativa (min 12 caratteri): password locale di emergenza per il primo amministratore
+      - key: AUTO_EDITOR_DOMAINS
+        value: toscanadiagnostica.it   # domini email abilitati in automatico come Editor al primo accesso Microsoft
+      - key: ENTRA_CLIENT_ID
+        sync: false   # App registration multi-tenant (vedi README)
+      - key: ENTRA_CLIENT_SECRET
+        sync: false
+      - key: ENTRA_AUTHORITY
+        value: organizations
+      - key: SEED_IMPORT_PLAN
+        value: "true"   # al primo avvio importa seed/plan_rev5.json (stato dell'artifact del 14/09/2026) se il database è vuoto
+      - key: SNAPSHOT_HOUR
+        value: "2"
+databases:
+  - name: td-integration-db
+    plan: basic-256mb
+    region: frankfurt
+    databaseName: tdintegration
+    user: tdintegration

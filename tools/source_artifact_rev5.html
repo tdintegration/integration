@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toscana Diagnostica - Integration Plan Management</title>
+<style id="td-style">
+/* TD Integration Hub - stile brand Toscana Diagnostica */
+:root {
+  --jet: #01212C; --teal: #1C505E; --pacific: #71B1BD; --canary: #F7F052; --cornsilk: #FFFAE3;
+  --ink: #12333E; --ink-2: #48656F; --ink-3: #7B929A; --paper: #FCFCFB; --card: #fff; --line: #E2E8EA;
+  --good: #2E7D32; --warn: #B26A00; --crit: #B3261E;
+  --c-gov: #1C505E; --c-reg: #7E57C2; --c-hr: #B08718; --c-it: #0E7FA0; --c-fin: #01212C;
+  --c-proc: #2E7D32; --c-cli: #B3261E; --c-mkt: #C2185B; --c-ops: #45AFD4;
+  --radius: 14px; --shadow: 0 1px 2px rgba(1,33,44,.06), 0 8px 24px rgba(1,33,44,.07);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+  font: 14.5px/1.5 "Inter Tight", "Segoe UI", -apple-system, Arial, sans-serif; }
+/* ---------- header ---------- */
+.hero { background: radial-gradient(900px 380px at 85% -50%, rgba(113,177,189,.22), transparent 60%),
+  linear-gradient(150deg, #000 0%, var(--jet) 55%, #06303f 100%);
+  color: #fff; padding: 26px 26px 20px; position: relative; }
+.hero::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--canary); }
+.hero .brand { display: flex; align-items: center; gap: 12px; }
+.hero .logo { height: 36px; }
+.hero .bn { font-weight: 750; letter-spacing: .13em; font-size: 13px; }
+.hero h1 { margin: 10px 0 4px; font-size: 24px; font-weight: 760; }
+.hero h1 .hl { background: var(--canary); color: var(--jet); padding: 0 8px; border-radius: 3px; }
+.hero .sub { opacity: .82; font-size: 13px; }
+.topbar { position: absolute; top: 14px; right: 16px; display: flex; gap: 6px; align-items: center; }
+.topbar button { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.35);
+  border-radius: 8px; padding: 4px 11px; cursor: pointer; font-size: 12.5px; font-weight: 650; font-family: inherit; }
+.topbar button.on { background: var(--canary); color: var(--jet); border-color: var(--canary); }
+/* ---------- nav ---------- */
+.nav { position: sticky; top: 0; z-index: 60; background: var(--paper); border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; overflow-x: auto; align-items: center; }
+.nav button { border: 1px solid var(--line); background: #fff; color: var(--ink-2); font-weight: 680;
+  padding: 6px 13px; border-radius: 999px; cursor: pointer; font-size: 12.5px; font-family: inherit; white-space: nowrap; }
+.nav button.on { background: var(--jet); color: var(--canary); border-color: var(--jet); }
+.nav .sp { flex: 1; }
+main { max-width: 1400px; margin: 0 auto; padding: 16px 20px 60px; }
+/* ---------- cards, tiles ---------- */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 15px 17px; margin-bottom: 14px; }
+.card h3 { margin: 0 0 8px; font-size: 15px; color: var(--teal); }
+.card .note { font-size: 11.5px; color: var(--ink-3); }
+.grid { display: grid; gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; }
+.tile .lab { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
+.tile .val { font-size: 20px; font-weight: 780; color: var(--jet); }
+.tile .sub { font-size: 11px; color: var(--ink-2); }
+.tile.dark { background: var(--jet); border-color: var(--jet); }
+.tile.dark .val { color: var(--canary); } .tile.dark .lab, .tile.dark .sub { color: #9FB6BE; }
+/* target cards in copertina */
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 13px; }
+.tcard { background: #fff; border: 1px solid var(--line); border-left: 6px solid var(--teal);
+  border-radius: 12px; padding: 13px 15px; cursor: pointer; box-shadow: var(--shadow); }
+.tcard:hover { border-left-color: var(--canary); }
+.tcard .tn { font-size: 16.5px; font-weight: 780; color: var(--jet); }
+.tcard .ti { font-size: 12px; color: var(--ink-2); margin: 3px 0 8px; min-height: 16px; }
+.pbar { height: 8px; border-radius: 5px; background: #EDF1F2; overflow: hidden; }
+.pbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--pacific), var(--teal)); }
+.tcard .meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+/* ---------- form ---------- */
+.frm { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 9px; }
+.fld label { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--ink-3); margin-bottom: 2px; font-weight: 700; }
+.fld input, .fld select, .fld textarea { width: 100%; border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 9px; font: inherit; color: #0000EE; font-weight: 650; background: #fff; }
+.fld input:focus { outline: 2px solid var(--pacific); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips .chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer;
+  font-size: 12px; font-weight: 700; color: var(--ink-2); background: #fff; user-select: none; }
+.chips .chip.on { background: var(--jet); color: var(--canary); border-color: var(--jet); }
+.opbox { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.opbox .fld { min-width: 170px; }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 750; }
+.badge.canary { background: var(--canary); color: var(--jet); }
+.badge.info { background: #E5EFF3; color: var(--teal); }
+.badge.warn { background: #FFF3E0; color: var(--warn); }
+.badge.crit { background: #FBE9E7; color: var(--crit); }
+.badge.good { background: #E8F5E9; color: var(--good); }
+.btn { border: 1px solid var(--jet); background: var(--jet); color: #fff; border-radius: 9px;
+  padding: 7px 13px; font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+.btn.ghost { background: #fff; color: var(--jet); }
+.btn.canary { background: var(--canary); color: var(--jet); border-color: var(--canary); }
+.btn.mini { padding: 3px 9px; font-size: 11.5px; border-radius: 7px; }
+.btn.danger { background: #fff; color: var(--crit); border-color: var(--crit); }
+/* ---------- gantt ---------- */
+.gwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+table.gantt { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+.gantt th, .gantt td { border-bottom: 1px solid #EDF1F2; border-right: 1px solid #F3F6F7; padding: 0; }
+.gantt thead th { background: var(--jet); color: #fff; font-size: 10px; padding: 5px 4px; position: sticky; top: 0; z-index: 5; }
+.gantt thead th .wd { color: var(--pacific); font-weight: 400; display: block; font-size: 9px; }
+.gantt thead th.m100 { background: var(--teal); }
+.gantt .actcol { position: sticky; left: 0; background: #fff; z-index: 4; min-width: 320px; max-width: 360px;
+  padding: 6px 9px; border-right: 2px solid var(--line); }
+.gantt thead .actcol { background: var(--jet); z-index: 6; text-align: left; font-size: 11px; }
+.gantt .actcol .an { font-weight: 700; font-size: 12px; color: var(--jet); cursor: pointer; }
+.gantt .actcol .ao { font-size: 10.5px; color: var(--teal); font-weight: 650; }
+.gantt .actcol .ad { font-size: 10px; color: var(--ink-3); }
+.gantt td.wk { width: 34px; min-width: 34px; height: 34px; cursor: pointer; position: relative; }
+.gantt td.wk:hover { outline: 2px solid var(--pacific); outline-offset: -2px; }
+.gantt td.wk.fill { border-radius: 0; }
+.gantt td.wk.start { border-radius: 8px 0 0 8px; }
+.gantt td.wk.end { border-radius: 0 8px 8px 0; }
+.gantt td.wk.startend { border-radius: 8px; }
+.gantt td.wk .ms { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--jet); font-size: 15px; }
+.gantt tr.done .actcol .an { text-decoration: line-through; color: var(--ink-3); }
+.gantt tbody tr:hover .actcol { background: #F7FAFA; }
+.stato { font-size: 10px; border-radius: 6px; padding: 1px 6px; font-weight: 750; display: inline-block; }
+.st0 { background: #EDF1F2; color: var(--ink-2); } .st1 { background: #E5EFF3; color: var(--teal); }
+.st2 { background: #E8F5E9; color: var(--good); } .st3 { background: #FBE9E7; color: var(--crit); }
+/* editor riga attivita' */
+.aedit { background: #F7FAFA; border-top: 2px solid var(--pacific); }
+.aedit td { padding: 10px 12px !important; }
+.aedit .frm { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+/* tendina multi-scelta ownership support */
+details.msdd { position: relative; }
+details.msdd summary {
+  list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 9px; background: #fff; color: #0000EE; font-weight: 650; font-size: 13px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;
+}
+details.msdd summary::after { content: " ▾"; color: var(--ink-3); }
+details.msdd[open] summary { border-color: var(--pacific); }
+.msdd-list {
+  position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);
+  padding: 8px; display: flex; flex-wrap: wrap; gap: 5px; width: 340px; max-height: 220px; overflow-y: auto;
+}
+.msdd-list .chip { border: 1.5px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer;
+  font-size: 11.5px; font-weight: 700; color: var(--ink-2); background: #fff; user-select: none; }
+.msdd-list .chip.on { background: var(--jet); color: var(--canary); border-color: var(--jet); }
+/* catalogo */
+.catgrp { margin-bottom: 10px; }
+.catgrp .cgh { font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--teal); margin: 8px 0 4px; }
+.catrow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 8px; font-size: 12.5px; }
+.catrow:hover { background: #F2F6F7; }
+.catrow .dot { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 9px; }
+.catrow .cn { flex: 1; }
+.catrow.used { opacity: .45; }
+.catrow.used .cn { text-decoration: line-through; }
+/* legenda processi */
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--ink-2); margin: 8px 2px; }
+.legend .it { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; }
+.legend .sw { width: 11px; height: 11px; border-radius: 3px; }
+/* alert */
+.alerts li { margin-bottom: 5px; font-size: 12.5px; }
+/* workload */
+table.wl { border-collapse: collapse; font-size: 12px; width: 100%; }
+.wl th, .wl td { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: right; }
+.wl th { background: #F2F6F7; color: var(--teal); font-size: 10.5px; text-transform: uppercase; }
+.wl td:first-child, .wl th:first-child { text-align: left; }
+/* modal stampa */
+.modal { position: fixed; inset: 0; background: rgba(1,33,44,.45); display: none; z-index: 100;
+  align-items: center; justify-content: center; }
+.modal.show { display: flex; }
+.mbox { background: #fff; border-radius: 14px; padding: 20px 22px; width: min(480px, 92vw); box-shadow: var(--shadow); }
+.mbox h3 { margin: 0 0 10px; color: var(--jet); }
+.mrow { margin: 9px 0; }
+/* ---------- print ---------- */
+#printarea { display: none; }
+@page { size: A4 landscape; margin: 8mm; }
+@media print {
+  body * { visibility: hidden; }
+  #printarea, #printarea * { visibility: visible; }
+  #printarea { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+  .psec { break-after: page; }
+  .psec:last-child { break-after: auto; }
+  .phead { display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px solid var(--jet);
+    padding-bottom: 6px; margin-bottom: 8px; }
+  .phead .t1 { font-size: 17px; font-weight: 800; color: var(--jet); }
+  .phead .t2 { font-size: 11px; color: var(--ink-2); }
+  table.pgantt { border-collapse: collapse; width: 100%; font-size: 8.5px; }
+  .pgantt th, .pgantt td { border: .5px solid #B9C7CC; padding: 2px 3px; }
+  .pgantt thead th { background: var(--jet) !important; color: #fff; font-size: 7.5px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pgantt td.on { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pgantt td.acol { text-align: left; max-width: 200px; }
+  .pgantt tr { break-inside: avoid; }
+  .pgantt thead { display: table-header-group; }
+  .plegend { font-size: 8px; margin-top: 5px; color: #333; }
+}
+
+/* --- versione portabile: salvataggio nel file, banner, chip di stato --- */
+.nav .navsave { background: var(--canary); color: var(--jet); border-color: var(--canary); font-weight: 800; }
+.nav .navsave:hover { filter: brightness(.96); }
+.syncchip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 650;
+  padding: 3px 10px; border-radius: 999px; margin-right: 6px; white-space: nowrap; }
+.syncchip .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.syncchip.ok { background: #E8F5E9; color: #2E7D32; } .syncchip.ok .dot { background: #2E7D32; }
+.syncchip.warn { background: #FDF3E1; color: #9A6200; } .syncchip.warn .dot { background: #C77F00; }
+#td-banner { max-width: 1440px; margin: 0 auto; padding: 0 22px; }
+#td-banner .bnr { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 9px 14px;
+  border-radius: 10px; font-size: 13px; border: 1px solid; }
+#td-banner .bnr.info { background: #EDF5F7; border-color: #CFE3E8; color: #1C505E; }
+#td-banner .bnr.warn { background: #FDF3E1; border-color: #F0DCB0; color: #7A5200; }
+#td-banner .bnr.okk  { background: #E8F5E9; border-color: #CBE6CD; color: #2E7D32; }
+#td-banner .bnr .x { margin-left: auto; cursor: pointer; border: none; background: none; font-size: 15px; color: inherit; opacity: .6; }
+#td-banner .bnr .x:hover { opacity: 1; }
+.revlog td { font-size: 12.5px; padding: 5px 10px; border-bottom: 1px solid var(--line); }
+.revlog td.r { font-weight: 800; color: var(--teal); white-space: nowrap; }
+@media print { #td-banner, .syncchip { display: none !important; } }
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="topbar">
+    <button id="lang-it" class="on" onclick="setLang('it')">IT</button>
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+  </div>
+  <div class="brand"><img class="logo" alt="Toscana Diagnostica" src="data:image/png;base64,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"></div>
+  <h1 id="h-title">Integration <span class="hl">Plan Management</span></h1>
+  <div class="sub" id="h-sub">Gestione e coordinamento del piano di integrazione post closing - Target Phase 1</div>
+</header>
+<nav class="nav" id="nav"></nav>
+<div id="td-banner"></div>
+<main id="main"></main>
+<datalist id="ownlist"></datalist>
+<input type="file" id="impfile" accept=".xlsx,.json" style="display:none">
+<input type="file" id="mrgfile" accept=".html,.htm,.xlsx" style="display:none">
+<div class="modal" id="printmodal">
+  <div class="mbox">
+    <h3 id="pm_t">Stampa PDF</h3>
+    <div class="mrow"><div class="fld"><label id="pm_l1">Perimetro</label>
+      <select id="pr_scope"><option value="this" id="pm_o1">Questa società</option><option value="all" id="pm_o2">Tutte le società</option></select></div></div>
+    <div class="mrow"><div class="fld"><label id="pm_l2">Vista</label>
+      <select id="pr_mode" onchange="byId('pr_ownrow').style.display=this.value==='owner'?'block':'none'">
+        <option value="full" id="pm_o3">GANTT totale per società</option>
+        <option value="owner" id="pm_o4">GANTT per owner (una pagina per persona)</option></select></div></div>
+    <div class="mrow" id="pr_ownrow" style="display:none"><div class="fld"><label>Owner</label><select id="pr_owner"></select></div></div>
+    <div class="mrow" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn ghost" onclick="byId('printmodal').classList.remove('show')" id="pm_c">Annulla</button>
+      <button class="btn canary" onclick="doPrint()" id="pm_go">Genera e stampa</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="firmamodal">
+  <div class="mbox">
+    <h3 id="fm_t">Chi sta salvando?</h3>
+    <div class="mrow"><div class="fld"><label id="fm_l1">Nome dal registro</label><select id="fm_sel"><option value=""></option></select></div></div>
+    <div class="mrow"><div class="fld"><label id="fm_l2">Oppure scrivi</label><input id="fm_alt" placeholder=""></div></div>
+    <div class="note" id="fm_n" style="margin-bottom:10px">La firma resta nel registro delle revisioni del file, così tutti sanno chi ha salvato per ultimo.</div>
+    <div class="mrow" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn ghost" id="fm_c" onclick="byId('firmamodal').classList.remove('show')">Chiudi</button>
+      <button class="btn canary" id="fm_go" onclick="fmGo()">Salva nel file</button>
+    </div>
+  </div>
+</div>
+<div id="printarea"></div>
+<script type="application/json" id="td-embed">{"v":2,"targets":[{"id":"gentras","nome":"GENTRAS","rs":"Gentras S.r.l.","ind":"VIA DEGLI ABATONI 11/6 - 59100 - PRATO (PO)","piva":"02162760975","ref":"Valentina Cesati","fatt":210000,"pfn":45000,"ev":115000,"linee":["lab"],"loi":"2026-03-27","prelim":"","closing":"2026-09-09","hor":20,"atts":[{"id":"a1","cid":"O2","nome":null,"proc":"hr","sw":1,"ew":1,"dett":"Silvia Quattrone come dipendente, Valentina Cesati come libero professionista","note":"","st":2,"pl":true,"ms":false,"owner":"CEO","support":["HR Manager"],"fine":"2026-09-09","lm":1789119671619},{"id":"a31","cid":"G3","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"fine":"2026-09-11","lm":1789119687595},{"id":"a2","cid":"O18","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"Nessun preavviso richiesto","note":"","st":2,"pl":true,"ms":false,"owner":"CFO","support":["COO"],"lm":1789387446397,"fine":"2026-08-31"},{"id":"a12","cid":"1.1","nome":null,"proc":"reg","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"],"lm":1789120138790},{"id":"a29","cid":"G1","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"lm":1789120146044},{"id":"a30","cid":"G2","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"lm":1789120157107},{"id":"a15","cid":"1.4","nome":null,"proc":"fin","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a33","cid":"G5","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"lm":1789387484370,"fine":"2026-09-14"},{"id":"a3","cid":"O3","nome":null,"proc":"mkt","sw":1,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["CFO","COO"],"lm":1789119750490},{"id":"a16","cid":"1.5","nome":null,"proc":"hr","sw":1,"ew":2,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"],"lm":1789387503887,"fine":"2026-09-15"},{"id":"a4","cid":"O1","nome":null,"proc":"hr","sw":2,"ew":3,"dett":"Engagement sul progetto. Meeting in laboratorio.","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"],"lm":1789387521580},{"id":"a5","cid":"O9","nome":null,"proc":"proc","sw":2,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"],"lm":1789120482527},{"id":"a6","cid":"O10","nome":null,"proc":"proc","sw":2,"ew":3,"dett":"","note":"Effetti diretti sul P&L","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"],"lm":1789120478184},{"id":"a7","cid":"O12","nome":null,"proc":"proc","sw":2,"ew":3,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"CFO","support":["Procurement","CEO"],"lm":1789387846767,"fine":"2026-09-18"},{"id":"a286","cid":"O4","nome":null,"proc":"mkt","sw":2,"ew":3,"owner":"Retail Manager","support":["CEO"],"dett":"Doppio logo sui referti","note":"","st":0,"pl":false,"ms":false},{"id":"a36","cid":"G8","nome":null,"proc":"proc","sw":2,"ew":3,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Procurement","support":[],"fine":"2026-09-15","lm":1789387886010},{"id":"a8","cid":"O17","nome":null,"proc":"mkt","sw":2,"ew":4,"dett":"Con il supporto di Valentina Cesati","note":"","st":2,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO"],"lm":1789387896093,"fine":"2026-09-17"},{"id":"a37","cid":"G9","nome":null,"proc":"mkt","sw":3,"ew":3,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Retail Manager","support":[],"lm":1789387923835,"fine":"2027-01-04"},{"id":"a17","cid":"2.1","nome":null,"proc":"gov","sw":3,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"]},{"id":"a9","cid":"O14","nome":null,"proc":"mkt","sw":3,"ew":6,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"],"lm":1789120897299},{"id":"a287","cid":"O5","nome":null,"proc":"cli","sw":3,"ew":7,"owner":"RSPP","support":["CEO","HSQ Manager"],"dett":"","note":"","st":0,"pl":false,"ms":false,"lm":1789120937278},{"id":"a290","cid":"O22","nome":null,"proc":"hr","sw":4,"ew":8,"owner":"HR Manager","support":["RSPP"],"dett":"","note":"","st":0,"pl":false,"ms":false},{"id":"a21","cid":"3.1","nome":null,"proc":"hr","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":[],"lm":1789120989011},{"id":"a291","cid":"G12","nome":null,"proc":"it","sw":2,"ew":3,"owner":"IT Management","support":["DPO"],"dett":"","note":"","st":2,"pl":false,"ms":false,"lm":1789388774343,"fine":"2026-09-25"},{"id":"a26","cid":"4.2","nome":null,"proc":"gov","sw":2,"ew":2,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"],"lm":1789388792832,"fine":"2026-09-14"},{"id":"a27","cid":"4.3","nome":null,"proc":"mkt","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a34","cid":"G6","nome":null,"proc":"fin","sw":11,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":[]},{"id":"a28","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a10","cid":"O19","nome":null,"proc":"gov","sw":19,"ew":19,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1789121110152},{"id":"a11","cid":"O24","nome":null,"proc":"gov","sw":20,"ew":20,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]}],"pec":"gentras@legalmail.it","tel":"0574 740027","mail":"info@gentras.com","web":"https://www.gentrastestcode.com/","lm":1789119616725},{"id":"cifs","nome":"CIFS","rs":"Centro Italiano di Fertilità e Sessualità - CIFS","ind":"Via della Fortezza 6, Firenze","piva":"05174880483","ref":"Angela De Marco","fatt":694562,"pfn":0,"ev":70000,"linee":["spec","lab","img"],"loi":"","prelim":"","closing":"2026-09-09","hor":24,"atts":[{"id":"a42","cid":"O16","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"Dott.ssa Sestieri Valentina","note":"","st":2,"pl":false,"ms":false,"owner":"CEO","support":[],"lm":1789121232438,"fine":"2026-09-09"},{"id":"a78","cid":"G2","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["CEO"],"lm":1789121338355,"fine":"2026-09-10"},{"id":"a79","cid":"G3","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"lm":1789121356537,"fine":"2026-09-10"},{"id":"a81","cid":"G5","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["CEO","HR Manager"],"fine":"2026-09-10","lm":1789121384925},{"id":"a82","cid":"G6","nome":null,"proc":"fin","sw":1,"ew":1,"dett":"","note":"","st":2,"pl":false,"ms":false,"owner":"CFO","support":[],"lm":1789121418092,"fine":"2026-09-09"},{"id":"a61","cid":"1.2","nome":null,"proc":"cli","sw":1,"ew":2,"dett":"Dott. Oreste Saltarelli","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HSQ Manager"],"lm":1789121294082},{"id":"a62","cid":"1.3","nome":null,"proc":"it","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO"],"lm":1789121310216},{"id":"a77","cid":"G1","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[],"lm":1789121319675},{"id":"a63","cid":"1.4","nome":null,"proc":"fin","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a80","cid":"G4","nome":null,"proc":"reg","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["CEO"]},{"id":"a89","cid":"G13","nome":null,"proc":"cli","sw":1,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["CEO","Business Back Office Manager"]},{"id":"a60","cid":"1.1","nome":null,"proc":"reg","sw":2,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"],"lm":1789121248482},{"id":"a44","cid":"O4","nome":null,"proc":"mkt","sw":2,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"],"lm":1789121239957},{"id":"a85","cid":"G9","nome":null,"proc":"mkt","sw":2,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":[],"lm":1789121344810},{"id":"a56","cid":"O20","nome":null,"proc":"mkt","sw":2,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a49","cid":"O9","nome":null,"proc":"proc","sw":2,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"],"lm":1789121512086},{"id":"a51","cid":"O12","nome":null,"proc":"proc","sw":2,"ew":4,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CFO","support":["Procurement","CEO"],"lm":1789121514222},{"id":"a64","cid":"1.5","nome":null,"proc":"hr","sw":3,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"],"lm":1789121425793},{"id":"a43","cid":"O1","nome":null,"proc":"hr","sw":3,"ew":3,"dett":"Engagement sul progetto. Meeting in struttura (apericena).","note":"Fissato: 17/09/2026","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"]},{"id":"a65","cid":"2.1","nome":null,"proc":"gov","sw":3,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"],"lm":1789121549795},{"id":"a66","cid":"2.2","nome":null,"proc":"cli","sw":3,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["HSQ Manager"]},{"id":"a84","cid":"G8","nome":null,"proc":"proc","sw":3,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":[]},{"id":"a68","cid":"2.4","nome":"Verifica manutenzioni preventive e controlli di sicurezza apparecchiature","proc":"proc","sw":3,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Procurement","CEO","COO"]},{"id":"a87","cid":"G11","nome":null,"proc":"gov","sw":3,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a53","cid":"O14","nome":null,"proc":"mkt","sw":3,"ew":6,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"],"lm":1789121557948},{"id":"a67","cid":"2.3","nome":null,"proc":"proc","sw":3,"ew":6,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["RSPP"],"lm":1789121559927},{"id":"a45","cid":"O5","nome":null,"proc":"cli","sw":3,"ew":6,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"RSPP","support":["CEO"]},{"id":"a50","cid":"O10","nome":null,"proc":"proc","sw":3,"ew":7,"dett":"","note":"Effetti diretti sul P&L","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"]},{"id":"a52","cid":"O15","nome":null,"proc":"ops","sw":3,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO","Business Back Office Manager"]},{"id":"a54","cid":"O13","nome":null,"proc":"hr","sw":4,"ew":8,"dett":"","note":"","st":2,"pl":true,"ms":false,"owner":"CEO","support":["HR Manager"],"fine":"2026-09-11","lm":1789121837499},{"id":"a58","cid":"O22","nome":null,"proc":"hr","sw":4,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["RSPP"]},{"id":"a69","cid":"3.1","nome":null,"proc":"hr","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["Medico Competente"]},{"id":"a70","cid":"3.2","nome":null,"proc":"fin","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CFO"],"lm":1789121855903},{"id":"a71","cid":"3.3","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["Direzione Sanitaria"]},{"id":"a86","cid":"G10","nome":null,"proc":"hr","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a88","cid":"G12","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["DPO"]},{"id":"a46","cid":"O6","nome":null,"proc":"ops","sw":5,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a47","cid":"O7","nome":null,"proc":"ops","sw":5,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO","Retail Manager"]},{"id":"a48","cid":"O8","nome":null,"proc":"hr","sw":6,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a73","cid":"4.1","nome":null,"proc":"cli","sw":9,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Direzione Sanitaria"]},{"id":"a74","cid":"4.2","nome":null,"proc":"gov","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"]},{"id":"a75","cid":"4.3","nome":null,"proc":"mkt","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a55","cid":"O19","nome":null,"proc":"gov","sw":22,"ew":22,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1789121987644},{"id":"a76","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a57","cid":"O21","nome":null,"proc":"it","sw":13,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager"]},{"id":"a59","cid":"O24","nome":null,"proc":"gov","sw":24,"ew":24,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1789121983940}],"web":"https://www.cifs.it/","pec":"cifs@pec.it","mail":"info@cifs.it","tel":"+39055470521","lm":1789121202596},{"id":"biolabor","nome":"BIOLABOR","rs":"Biolabor Servizi Sanitari S.r.l.","ind":"Via Giovanni March 20, 57121 Livorno (LI)","piva":"02024480499","ref":"Yann Inghilesi","fatt":3700000,"pfn":200000,"ev":3500000,"linee":["lab","spec","lav"],"loi":"2026-03-16","prelim":"2026-09-14","closing":"2026-10-30","hor":24,"atts":[{"id":"a90","cid":"O23","nome":null,"proc":"gov","sw":1,"ew":5,"dett":"Supporto alla chiusura del concordato e acquisizione delle quote di Biolabor S.r.l. da parte di Biolabor Servizi Sanitari S.r.l.","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":[]},{"id":"a91","cid":"O1","nome":null,"proc":"hr","sw":4,"ew":5,"dett":"Engagement sul progetto. Meeting in laboratorio.","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"]},{"id":"a92","cid":"O3","nome":null,"proc":"mkt","sw":4,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["CFO","COO"]},{"id":"a96","cid":"O14","nome":null,"proc":"mkt","sw":4,"ew":8,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a93","cid":"O4","nome":null,"proc":"mkt","sw":5,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a94","cid":"O5","nome":null,"proc":"cli","sw":5,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"RSPP","support":["CEO"]},{"id":"a118","cid":"2.4","nome":"Verifica manutenzioni preventive e controlli di sicurezza apparecchiature","proc":"proc","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Procurement","CEO","COO"]},{"id":"a119","cid":"3.1","nome":null,"proc":"hr","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["Medico Competente"]},{"id":"a95","cid":"O6","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a97","cid":"O7","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO","Retail Manager"]},{"id":"a98","cid":"O8","nome":null,"proc":"hr","sw":5,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a99","cid":"O18","nome":null,"proc":"gov","sw":6,"ew":6,"dett":"Laboratorio e magazzino di via March, preavviso 90 giorni","note":"Rilascio previsto 31/01/2027","st":0,"pl":true,"ms":false,"owner":"CEO","support":["CFO"]},{"id":"a101","cid":"O10","nome":null,"proc":"proc","sw":7,"ew":7,"dett":"Pricing inferiore","note":"","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"]},{"id":"a102","cid":"O11","nome":null,"proc":"proc","sw":7,"ew":7,"dett":"Fornitori vari","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement"]},{"id":"a103","cid":"O12","nome":null,"proc":"proc","sw":7,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement","CEO"]},{"id":"a115","cid":"2.1","nome":null,"proc":"gov","sw":7,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"]},{"id":"a116","cid":"2.2","nome":null,"proc":"cli","sw":7,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["HSQ Manager"]},{"id":"a135","cid":"G9","nome":null,"proc":"mkt","sw":7,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":[]},{"id":"a113","cid":"1.4","nome":null,"proc":"fin","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a114","cid":"1.5","nome":null,"proc":"hr","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a117","cid":"2.3","nome":null,"proc":"proc","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["RSPP"]},{"id":"a120","cid":"3.2","nome":null,"proc":"fin","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CFO"]},{"id":"a123","cid":"4.1","nome":null,"proc":"cli","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Direzione Sanitaria"]},{"id":"a124","cid":"4.2","nome":null,"proc":"gov","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"]},{"id":"a127","cid":"G1","nome":null,"proc":"gov","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a128","cid":"G2","nome":null,"proc":"gov","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a129","cid":"G3","nome":null,"proc":"gov","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a137","cid":"G11","nome":null,"proc":"gov","sw":7,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a138","cid":"G12","nome":null,"proc":"it","sw":7,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["DPO"]},{"id":"a100","cid":"O9","nome":null,"proc":"proc","sw":7,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"]},{"id":"a104","cid":"O13","nome":null,"proc":"hr","sw":7,"ew":12,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CEO","support":["HR Manager"]},{"id":"a125","cid":"4.3","nome":null,"proc":"mkt","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a121","cid":"3.3","nome":null,"proc":"it","sw":10,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["Direzione Sanitaria"]},{"id":"a136","cid":"G10","nome":null,"proc":"hr","sw":11,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a108","cid":"O22","nome":null,"proc":"hr","sw":11,"ew":20,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["RSPP"]},{"id":"a105","cid":"O19","nome":null,"proc":"gov","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]},{"id":"a107","cid":"O21","nome":null,"proc":"it","sw":13,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager"]},{"id":"a126","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a106","cid":"O20","nome":null,"proc":"mkt","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a110","cid":"1.1","nome":null,"proc":"reg","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"]},{"id":"a111","cid":"1.2","nome":null,"proc":"cli","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Legal & Compliance"]},{"id":"a112","cid":"1.3","nome":null,"proc":"it","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["CFO"]},{"id":"a109","cid":"O24","nome":null,"proc":"gov","sw":21,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]}],"pec":"biolaborss@legalmail.it","web":"https://www.biolabor.it/","tel":"0586/1836222"},{"id":"bioscienze","nome":"BIO SCIENZE","rs":"BIOSCIENZE di Penni Fulvia","ind":"Borgo San Lorenzo (FI)","piva":"06025620482","ref":"Fulvia Penni","fatt":1600000,"pfn":280000,"ev":1320000,"linee":["lab","spec","img","lav"],"loi":"2026-03-17","prelim":"2026-09-04","closing":"2026-10-30","hor":24,"atts":[{"id":"a140","cid":"O23","nome":null,"proc":"gov","sw":1,"ew":5,"dett":"Supporto alla trasformazione in S.r.l. gestita da professionista della cedente","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":[]},{"id":"a149","cid":"nuova","nome":{"it":"Lavori di adeguamento dei locali per nuova RM 1.5/3T","en":"Premises works for the new 1.5/3T MRI"},"proc":"ops","sw":5,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Business Back Office Manager"]},{"id":"a145","cid":"O6","nome":null,"proc":"ops","sw":5,"ew":17,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a147","cid":"O7","nome":null,"proc":"ops","sw":5,"ew":17,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO","Retail Manager"]},{"id":"a148","cid":"O8","nome":null,"proc":"hr","sw":5,"ew":17,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a181","cid":"G5","nome":null,"proc":"gov","sw":6,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["CEO"]},{"id":"a160","cid":"1.1","nome":null,"proc":"reg","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"]},{"id":"a161","cid":"1.2","nome":null,"proc":"cli","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Legal & Compliance"]},{"id":"a162","cid":"1.3","nome":null,"proc":"it","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["CFO"]},{"id":"a177","cid":"G1","nome":null,"proc":"gov","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a178","cid":"G2","nome":null,"proc":"gov","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a185","cid":"G9","nome":null,"proc":"mkt","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":[]},{"id":"a163","cid":"1.4","nome":null,"proc":"fin","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a179","cid":"G3","nome":null,"proc":"gov","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a183","cid":"G7","nome":null,"proc":"mkt","sw":9,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a146","cid":"O14","nome":null,"proc":"mkt","sw":9,"ew":12,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a169","cid":"3.1","nome":null,"proc":"hr","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["Medico Competente"]},{"id":"a170","cid":"3.2","nome":null,"proc":"fin","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CFO"]},{"id":"a171","cid":"3.3","nome":null,"proc":"it","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["Direzione Sanitaria"]},{"id":"a188","cid":"G12","nome":null,"proc":"it","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["DPO"]},{"id":"a180","cid":"G4","nome":null,"proc":"reg","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Business Back Office Manager"]},{"id":"a165","cid":"2.1","nome":null,"proc":"gov","sw":10,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"]},{"id":"a141","cid":"O1","nome":null,"proc":"hr","sw":10,"ew":10,"dett":"Engagement sul progetto. Meeting in laboratorio.","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"]},{"id":"a142","cid":"O3","nome":null,"proc":"mkt","sw":10,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["CFO","COO"]},{"id":"a143","cid":"O4","nome":null,"proc":"mkt","sw":10,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a151","cid":"O10","nome":null,"proc":"proc","sw":10,"ew":10,"dett":"Pricing inferiore","note":"","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"]},{"id":"a164","cid":"1.5","nome":null,"proc":"hr","sw":10,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a166","cid":"2.2","nome":null,"proc":"cli","sw":10,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["HSQ Manager"]},{"id":"a184","cid":"G8","nome":null,"proc":"proc","sw":10,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":[]},{"id":"a167","cid":"2.3","nome":null,"proc":"proc","sw":10,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["RSPP"]},{"id":"a187","cid":"G11","nome":null,"proc":"gov","sw":10,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a168","cid":"2.4","nome":"Verifica manutenzioni preventive e controlli di sicurezza apparecchiature","proc":"proc","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Procurement","CEO","COO"]},{"id":"a152","cid":"O11","nome":null,"proc":"proc","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement"]},{"id":"a153","cid":"O12","nome":null,"proc":"proc","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement","CEO"]},{"id":"a150","cid":"O9","nome":null,"proc":"proc","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"]},{"id":"a154","cid":"O13","nome":null,"proc":"hr","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CEO","support":["HR Manager"]},{"id":"a173","cid":"4.1","nome":null,"proc":"cli","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Direzione Sanitaria"]},{"id":"a174","cid":"4.2","nome":null,"proc":"gov","sw":10,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"]},{"id":"a175","cid":"4.3","nome":null,"proc":"mkt","sw":10,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a144","cid":"O5","nome":null,"proc":"cli","sw":10,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"RSPP","support":["CEO"]},{"id":"a155","cid":"O19","nome":null,"proc":"gov","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]},{"id":"a157","cid":"O21","nome":null,"proc":"it","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager"]},{"id":"a176","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a156","cid":"O20","nome":null,"proc":"mkt","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a158","cid":"O22","nome":null,"proc":"hr","sw":14,"ew":20,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["RSPP"]},{"id":"a186","cid":"G10","nome":null,"proc":"hr","sw":16,"ew":17,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a182","cid":"G6","nome":null,"proc":"fin","sw":21,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":[]},{"id":"a159","cid":"O24","nome":null,"proc":"gov","sw":21,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1788538827415}],"web":"https://www.bioscienze.net/","pec":"certificata@pec.bioscienze.net","mail":"info.bio@bioscienze.net","tel":"0558456762"},{"id":"labronica","nome":"LABRONICA","rs":"","ind":"Livorno","piva":"","ref":"","fatt":"","pfn":"","ev":"","linee":["lab"],"loi":"","prelim":"2026-09-04","closing":"2026-10-05","hor":24,"atts":[{"id":"a190","cid":"O23","nome":null,"proc":"gov","sw":1,"ew":5,"dett":"Supporto alla trasformazione in S.r.l. con professionista interno","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":[]},{"id":"a217","cid":"3.1","nome":null,"proc":"hr","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["Medico Competente"]},{"id":"a216","cid":"2.4","nome":"Verifica manutenzioni preventive e controlli di sicurezza apparecchiature","proc":"proc","sw":5,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Procurement","CEO","COO"]},{"id":"a218","cid":"3.2","nome":null,"proc":"fin","sw":5,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CFO"]},{"id":"a219","cid":"3.3","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["Direzione Sanitaria"]},{"id":"a220","cid":"3.4","nome":null,"proc":"proc","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["Direzione Sanitaria"]},{"id":"a234","cid":"G10","nome":null,"proc":"hr","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a236","cid":"G12","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["DPO"]},{"id":"a198","cid":"O6","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a199","cid":"O7","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO","Retail Manager"]},{"id":"a200","cid":"O8","nome":null,"proc":"hr","sw":5,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a227","cid":"G3","nome":null,"proc":"gov","sw":6,"ew":6,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a229","cid":"G5","nome":null,"proc":"gov","sw":6,"ew":6,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a194","cid":"O9","nome":null,"proc":"proc","sw":6,"ew":6,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"]},{"id":"a195","cid":"O10","nome":null,"proc":"proc","sw":6,"ew":6,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"]},{"id":"a196","cid":"O11","nome":null,"proc":"proc","sw":6,"ew":6,"dett":"Fornitori vari","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement"]},{"id":"a197","cid":"O12","nome":null,"proc":"proc","sw":6,"ew":6,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CFO","support":["Procurement","CEO"]},{"id":"a208","cid":"1.1","nome":null,"proc":"reg","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"]},{"id":"a209","cid":"1.2","nome":null,"proc":"cli","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Legal & Compliance"]},{"id":"a210","cid":"1.3","nome":null,"proc":"it","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["CFO"]},{"id":"a225","cid":"G1","nome":null,"proc":"gov","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a226","cid":"G2","nome":null,"proc":"gov","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a233","cid":"G9","nome":null,"proc":"mkt","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":[]},{"id":"a211","cid":"1.4","nome":null,"proc":"fin","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a231","cid":"G7","nome":null,"proc":"mkt","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO","Business Back Office Manager"]},{"id":"a228","cid":"G4","nome":null,"proc":"reg","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Business Back Office Manager"]},{"id":"a213","cid":"2.1","nome":null,"proc":"gov","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"]},{"id":"a214","cid":"2.2","nome":null,"proc":"cli","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["HSQ Manager"]},{"id":"a232","cid":"G8","nome":null,"proc":"proc","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["CEO"]},{"id":"a191","cid":"O2","nome":null,"proc":"hr","sw":6,"ew":7,"dett":"Milena Monti, Valeria Momini","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager"]},{"id":"a193","cid":"O3","nome":null,"proc":"mkt","sw":6,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["CFO","COO"]},{"id":"a212","cid":"1.5","nome":null,"proc":"hr","sw":6,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a215","cid":"2.3","nome":null,"proc":"proc","sw":6,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["RSPP"]},{"id":"a235","cid":"G11","nome":null,"proc":"gov","sw":6,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a201","cid":"O17","nome":null,"proc":"mkt","sw":6,"ew":9,"dett":"Con il supporto di Milena Monti","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Business Back Office Manager","Retail Manager"],"lm":1788538812874},{"id":"a202","cid":"O14","nome":null,"proc":"mkt","sw":6,"ew":10,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a230","cid":"G6","nome":null,"proc":"fin","sw":6,"ew":18,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":[]},{"id":"a192","cid":"O1","nome":null,"proc":"hr","sw":7,"ew":8,"dett":"Engagement sul progetto. Meeting in laboratorio.","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"]},{"id":"a221","cid":"4.1","nome":null,"proc":"cli","sw":9,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Direzione Sanitaria"]},{"id":"a222","cid":"4.2","nome":null,"proc":"gov","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"]},{"id":"a223","cid":"4.3","nome":null,"proc":"mkt","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a203","cid":"O19","nome":null,"proc":"gov","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]},{"id":"a205","cid":"O21","nome":null,"proc":"it","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager"]},{"id":"a224","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a204","cid":"O20","nome":null,"proc":"mkt","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a206","cid":"O22","nome":null,"proc":"hr","sw":14,"ew":20,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["RSPP"]},{"id":"a207","cid":"O24","nome":null,"proc":"gov","sw":21,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1788538799598}]},{"id":"cor","nome":"COR","rs":"","ind":"Via Giano della Bella 6, Firenze","piva":"","ref":"","fatt":"","pfn":"","ev":"","linee":["spec","img","lab"],"loi":"","prelim":"","closing":"2026-09-04","hor":24,"atts":[{"id":"a238","cid":"O16","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"Dott.ssa Sestieri Valentina","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":[]},{"id":"a239","cid":"O1","nome":null,"proc":"hr","sw":1,"ew":1,"dett":"Engagement sul progetto. Meeting in struttura (apericena).","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["HR Manager","Retail Manager","Business Back Office Manager"]},{"id":"a240","cid":"O4","nome":null,"proc":"mkt","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a241","cid":"O5","nome":null,"proc":"cli","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"RSPP","support":["CEO"]},{"id":"a256","cid":"1.1","nome":null,"proc":"reg","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"]},{"id":"a257","cid":"1.2","nome":null,"proc":"cli","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Legal & Compliance"]},{"id":"a258","cid":"1.3","nome":null,"proc":"it","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["CFO"]},{"id":"a273","cid":"G1","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a274","cid":"G2","nome":null,"proc":"gov","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a281","cid":"G9","nome":null,"proc":"mkt","sw":1,"ew":1,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":[]},{"id":"a259","cid":"1.4","nome":null,"proc":"fin","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a275","cid":"G3","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a277","cid":"G5","nome":null,"proc":"gov","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a278","cid":"G6","nome":null,"proc":"fin","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":[]},{"id":"a279","cid":"G7","nome":null,"proc":"mkt","sw":1,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Commerciale","support":[]},{"id":"a260","cid":"1.5","nome":null,"proc":"hr","sw":1,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a276","cid":"G4","nome":null,"proc":"reg","sw":1,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Direzione Sanitaria"]},{"id":"a285","cid":"G13","nome":null,"proc":"cli","sw":1,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":[]},{"id":"a245","cid":"O9","nome":null,"proc":"proc","sw":2,"ew":2,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"COO","support":["Procurement","CEO","CFO"]},{"id":"a247","cid":"O12","nome":null,"proc":"proc","sw":2,"ew":2,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CFO","support":["Procurement","CEO"]},{"id":"a248","cid":"O15","nome":null,"proc":"ops","sw":3,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["Procurement"]},{"id":"a261","cid":"2.1","nome":null,"proc":"gov","sw":3,"ew":3,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["DPO"]},{"id":"a262","cid":"2.2","nome":null,"proc":"cli","sw":3,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Direzione Sanitaria","support":["HSQ Manager"]},{"id":"a280","cid":"G8","nome":null,"proc":"proc","sw":3,"ew":4,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":[]},{"id":"a263","cid":"2.3","nome":null,"proc":"proc","sw":3,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["RSPP"]},{"id":"a264","cid":"2.4","nome":null,"proc":"proc","sw":3,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Ingegneria Clinica","support":["Procurement"]},{"id":"a283","cid":"G11","nome":null,"proc":"gov","sw":3,"ew":5,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":[]},{"id":"a249","cid":"O14","nome":null,"proc":"mkt","sw":3,"ew":7,"dett":"Con il supporto di Wodka Agency","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["CEO"]},{"id":"a265","cid":"3.1","nome":null,"proc":"hr","sw":5,"ew":7,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["Medico Competente"]},{"id":"a266","cid":"3.2","nome":null,"proc":"fin","sw":5,"ew":8,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CFO"]},{"id":"a267","cid":"3.3","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["Direzione Sanitaria"]},{"id":"a268","cid":"3.4","nome":null,"proc":"proc","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Procurement","support":["Direzione Sanitaria"]},{"id":"a282","cid":"G10","nome":null,"proc":"hr","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["CEO"]},{"id":"a284","cid":"G12","nome":null,"proc":"it","sw":5,"ew":9,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"IT Management","support":["DPO"]},{"id":"a242","cid":"O6","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a243","cid":"O7","nome":null,"proc":"ops","sw":5,"ew":10,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["CEO","Retail Manager"]},{"id":"a244","cid":"O8","nome":null,"proc":"hr","sw":5,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager","CEO"]},{"id":"a246","cid":"O10","nome":null,"proc":"proc","sw":7,"ew":12,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"COO","support":["Procurement","CFO"]},{"id":"a250","cid":"O13","nome":null,"proc":"hr","sw":7,"ew":12,"dett":"","note":"","st":0,"pl":true,"ms":false,"owner":"CEO","support":["HR Manager"]},{"id":"a269","cid":"4.1","nome":null,"proc":"cli","sw":9,"ew":11,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HSQ Manager","support":["Direzione Sanitaria"]},{"id":"a270","cid":"4.2","nome":null,"proc":"gov","sw":9,"ew":12,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Legal & Compliance","support":["Broker Assicurativo"]},{"id":"a271","cid":"4.3","nome":null,"proc":"mkt","sw":9,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Retail Manager","support":["Business Back Office Manager","CEO"]},{"id":"a251","cid":"O19","nome":null,"proc":"gov","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[]},{"id":"a253","cid":"O21","nome":null,"proc":"it","sw":13,"ew":13,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"Business Back Office Manager","support":["Retail Manager"]},{"id":"a272","cid":"4.4","nome":null,"proc":"fin","sw":13,"ew":15,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CFO","support":["CEO"]},{"id":"a252","cid":"O20","nome":null,"proc":"mkt","sw":14,"ew":14,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"CEO","support":["Retail Manager"]},{"id":"a254","cid":"O22","nome":null,"proc":"hr","sw":14,"ew":20,"dett":"","note":"","st":0,"pl":false,"ms":false,"owner":"HR Manager","support":["RSPP"]},{"id":"a255","cid":"O24","nome":null,"proc":"gov","sw":21,"ew":21,"dett":"","note":"","st":0,"pl":false,"ms":true,"owner":"CEO","support":[],"lm":1788538786517}]}],"team":[{"r":"CEO","f":"Interna","n":"Francesco Epifani"},{"r":"Business Back Office Manager","f":"Interna","n":"Rosetta Greco"},{"r":"Legal & Compliance","f":"Esterna","n":"UFIRM"},{"r":"Retail Manager","f":"Interna","n":"Silvia Sansoni"},{"r":"Direzione Sanitaria","f":"Interna","n":"Gian Luigi Taddei"},{"r":"Procurement","f":"Interna","n":"Valentina Zezza"},{"r":"IT Management","f":"Esterna","n":"Hot Bit"},{"r":"HR Manager","f":"Interna","n":"Angelica Corradi"},{"r":"CFO","f":"Interna","n":"Vincenzo Malenchini"},{"r":"COO","f":"Interna","n":"Valentina Zezza"},{"r":"Direzione Commerciale","f":"Interna","n":"Francesco Epifani"},{"r":"DPO","f":"Esterna","n":"Claudia Del Re"},{"r":"HSQ Manager","f":"Interna","n":"Iacopo Cupelli"},{"r":"RSPP","f":"Interna","n":"Iacopo Cupelli"},{"r":"Broker Assicurativo","f":"Esterna","n":"Cristiano Di Lello"},{"r":"Ingegneria Clinica","f":"Interna","n":"Iacopo Cupelli"},{"r":"Medico Competente","f":"Interna","n":"Vincenzo Cupelli"},{"r":"Responsabile Professioni Sanitarie","f":"Interna","n":"Federico Stabile","lm":1789200661025}],"meta":{"rev":5,"savedBy":"Francesco Epifani (CEO)","savedAt":"2026-09-14T12:31:29.412Z","log":[{"rev":5,"by":"Francesco Epifani (CEO)","at":"2026-09-14T12:31:29.412Z"},{"rev":4,"by":"Francesco Epifani (CEO)","at":"2026-09-12T08:11:09.489Z"},{"rev":3,"by":"Francesco Epifani (CEO)","at":"2026-09-11T10:20:32.625Z"},{"rev":2,"by":"Francesco Epifani (CEO)","at":"2026-09-04T16:20:49.474Z"},{"rev":1,"by":"Francesco Epifani (CEO)","at":"2026-09-03T12:49:42.535Z"}]}}</script>
+<script id="td-main">
+/* TD Integration Plan Management - logica applicativa. Nessuna dipendenza esterna. */
+'use strict';
+
+/* ---------------- i18n ---------------- */
+var LANG = 'it';
+var I18N = {
+  title: { it: 'Integration Plan Management', en: 'Integration Plan Management' },
+  sub: { it: 'Gestione e coordinamento del piano di integrazione post closing - Target Phase 1', en: 'Management and coordination of the post-closing integration plan - Phase 1 targets' },
+  cover: { it: 'Dashboard', en: 'Dashboard' },
+  newTarget: { it: '+ Nuovo Target', en: '+ New Target' },
+  export_: { it: 'Salva XLSX', en: 'Save XLSX' },
+  import_: { it: 'Carica dati', en: 'Load data' },
+  saveFile: { it: 'Salva nel file', en: 'Save to file' },
+  saveFile_pub: { it: 'Salva e pubblica', en: 'Save & publish' },
+  firmaNote_pub: { it: 'La firma resta nel registro delle revisioni della pagina, così tutto il team sa chi ha pubblicato per ultimo. Dopo il salvataggio la pagina si ricarica con la nuova versione per tutti.', en: 'The signature stays in the page revision log, so the whole team knows who published last. After saving, the page reloads to the new version for everyone.' },
+  savedPub: { it: 'Pubblicato per il team', en: 'Published for the team' },
+  pubConflict: { it: 'Un altro membro del team ha pubblicato una versione più recente: la pagina si ricarica con quella versione. Le tue modifiche restano nella memoria di questo browser.', en: 'Another team member published a newer version: the page reloads to it. Your changes stay in this browser memory.' },
+  pubRO: { it: 'Vista di sola lettura: non hai i permessi per pubblicare modifiche a questa pagina.', en: 'Read-only view: you do not have permission to publish changes to this page.' },
+  pubErr: { it: 'Pubblicazione non riuscita. Riprova tra qualche secondo; in alternativa esporta i dati (Export) per non perderli.', en: 'Publishing failed. Try again in a few seconds; alternatively export the data (Export) so nothing is lost.' },
+  pubBusy: { it: 'Pubblicazione in corso…', en: 'Publishing…' },
+  srcFile_pub: { it: 'Dati della versione pubblicata', en: 'Data of the published version' },
+  srcLocalNew_pub: { it: 'Ho caricato modifiche più recenti trovate nella memoria di questo browser, non ancora pubblicate: premi "Salva e pubblica" per condividerle con il team.', en: 'Loaded more recent changes found in this browser memory, not yet published: press "Save & publish" to share them with the team.' },
+  srcLocalOnly_pub: { it: 'Dati caricati dalla memoria di questo browser: premi "Salva e pubblica" per condividerli con il team.', en: 'Data loaded from this browser memory: press "Save & publish" to share them with the team.' },
+  chipDirty_pub: { it: 'da pubblicare', en: 'to be published' },
+  chipSync_pub: { it: 'allineato alla versione pubblicata', en: 'in sync with published version' },
+  dlgOk: { it: 'OK', en: 'OK' },
+  dlgCancel: { it: 'Annulla', en: 'Cancel' },
+  dlgConfirm: { it: 'Conferma', en: 'Confirm' },
+  mergeBtn: { it: 'Unisci da file', en: 'Merge from file' },
+  firmaTit: { it: 'Chi sta salvando?', en: 'Who is saving?' },
+  firmaSel: { it: 'Nome dal registro', en: 'Name from the registry' },
+  firmaAlt: { it: 'Oppure scrivi', en: 'Or type it' },
+  firmaNote: { it: 'La firma resta nel registro delle revisioni del file, così tutti sanno chi ha salvato per ultimo.', en: 'The signature stays in the file revision log, so everyone knows who saved last.' },
+  savedFsa: { it: 'Salvato nel file', en: 'Saved to file' },
+  savedDl: { it: 'Copia aggiornata scaricata: sostituisci con questa il file precedente nella cartella condivisa.', en: 'Updated copy downloaded: replace the previous file in the shared folder with it.' },
+  srcFile: { it: 'Dati caricati dal file', en: 'Data loaded from the file' },
+  srcLocalNew: { it: 'Ho caricato modifiche più recenti trovate nella memoria di questo browser, non ancora salvate nel file: premi "Salva nel file" per consolidarle.', en: 'Loaded more recent changes found in this browser memory, not yet saved to the file: press "Save to file" to consolidate them.' },
+  srcLocalOnly: { it: 'Dati caricati dalla memoria di questo browser: premi "Salva nel file" per portarli dentro il file, così viaggiano con esso.', en: 'Data loaded from this browser memory: press "Save to file" to carry them inside the file, so they travel with it.' },
+  chipDirty: { it: 'da salvare nel file', en: 'to be saved to file' },
+  chipSync: { it: 'allineato al file', en: 'in sync with file' },
+  rev: { it: 'rev', en: 'rev' },
+  revLog: { it: 'Registro revisioni del file', en: 'File revision log' },
+  revNone: { it: 'Nessun salvataggio nel file ancora registrato: premi "Salva nel file" in alto per il primo.', en: 'No file save recorded yet: press "Save to file" above for the first one.' },
+  revBy: { it: 'Salvato da', en: 'Saved by' },
+  mergeRep: { it: 'Unione completata: {aU} attività aggiornate, {aN} aggiunte, {tN} target aggiunte, {gU} anagrafiche aggiornate. Ora premi "Salva nel file" per consolidare.', en: 'Merge complete: {aU} activities updated, {aN} added, {tN} targets added, {gU} records updated. Now press "Save to file" to consolidate.' },
+  mergeNo: { it: 'Nessuna differenza trovata: le due copie erano già allineate.', en: 'No differences found: the two copies were already aligned.' },
+  mergeErr: { it: 'File non riconosciuto: scegli una copia HTML di questa app oppure un suo export XLSX.', en: 'File not recognised: choose an HTML copy of this app or one of its XLSX exports.' },
+  print: { it: 'Stampa PDF', en: 'Print PDF' },
+  targets: { it: 'Società target', en: 'Target companies' },
+  totAct: { it: 'Attività totali', en: 'Total activities' },
+  avgDone: { it: 'Avanzamento medio', en: 'Average progress' },
+  noOwner: { it: 'Attività senza owner', en: 'Activities without owner' },
+  closingWin: { it: 'Finestra closing', en: 'Closing window' },
+  openCard: { it: 'Apri la scheda', en: 'Open the card' },
+  anagrafica: { it: 'Dettagli della società target', en: 'Target company details' },
+  rs: { it: 'Ragione Sociale', en: 'Company name' },
+  ind: { it: 'Indirizzo', en: 'Address' },
+  piva: { it: 'P.IVA', en: 'VAT no.' },
+  ref: { it: 'Persona di riferimento', en: 'Reference person' },
+  fatt: { it: 'Fatturato 2025 (€)', en: '2025 revenue (€)' },
+  pfn: { it: 'PFN (€)', en: 'NFP (€)' },
+  ev: { it: 'EV (€)', en: 'EV (€)' },
+  linee: { it: 'Linee di attività', en: 'Business lines' },
+  lin_lab: { it: 'Analisi di Laboratorio', en: 'Laboratory Testing' },
+  lin_img: { it: 'Diagnostica per Immagini', en: 'Imaging Diagnostics' },
+  lin_spec: { it: 'Medicina Specialistica', en: 'Specialist Medicine' },
+  lin_lav: { it: 'Medicina del Lavoro', en: 'Occupational Health' },
+  lin_chir: { it: 'Chirurgia', en: 'Surgery' },
+  lin_altro: { it: 'Altro', en: 'Other' },
+  operazione: { it: 'Disegno dell’operazione', en: 'Deal structure' },
+  loi: { it: 'Lettera di Intenti', en: 'Letter of Intent' },
+  prelim: { it: 'Preliminare', en: 'Preliminary agreement' },
+  closing: { it: 'Closing', en: 'Closing' },
+  ganttStart: { it: 'Il GANTT parte dal lunedì della settimana del Preliminare se indicato, altrimenti del Closing.', en: 'The GANTT starts on the Monday of the Preliminary week if set, otherwise of the Closing week.' },
+  orizzonte: { it: 'Orizzonte (settimane)', en: 'Horizon (weeks)' },
+  gantt: { it: 'GANTT di integrazione', en: 'Integration GANTT' },
+  ganttHint: { it: 'Clicca le celle per pianificare: un clic fuori dalla barra la estende, sul bordo la accorcia, sull’unica settimana la cancella. Clicca il nome per modificare owner, note e stato.', en: 'Click cells to plan: clicking outside the bar extends it, on its edge trims it, on its only week clears it. Click the name to edit owners, notes and status.' },
+  attivita: { it: 'Attività', en: 'Activity' },
+  owners: { it: 'Owner', en: 'Owner' },
+  support: { it: 'Ownership Support', en: 'Ownership Support' },
+  selSupport: { it: 'Seleziona una o più funzioni', en: 'Select one or more functions' },
+  nessuno: { it: 'Nessuno', en: 'None' },
+  dett: { it: 'Dettagli', en: 'Details' },
+  note: { it: 'Note', en: 'Notes' },
+  status: { it: 'Stato', en: 'Status' },
+  st0: { it: 'Da avviare', en: 'To start' },
+  st1: { it: 'In corso', en: 'In progress' },
+  st2: { it: 'Completata', en: 'Completed' },
+  st3: { it: 'Critica', en: 'Critical' },
+  sw: { it: 'Settimana inizio', en: 'Start week' },
+  ew: { it: 'Settimana fine', en: 'End week' },
+  pl: { it: 'Effetti diretti sul P&L', en: 'Direct P&L impact' },
+  ms: { it: 'Milestone', en: 'Milestone' },
+  del: { it: 'Elimina', en: 'Delete' },
+  chiudi: { it: 'Chiudi', en: 'Close' },
+  catalogo: { it: 'Catalogo attività (adempimenti generali + attività operative TD)', en: 'Activity catalogue (general obligations + TD operating activities)' },
+  catHint: { it: 'Tutte le attività del piano generale e delle schede: aggiungile al GANTT con un clic. Le voci barrate sono già in scheda.', en: 'Every activity from the master plan and the target sheets: add them to the GANTT with one click. Struck-through items are already on the card.' },
+  add: { it: 'Aggiungi', en: 'Add' },
+  addCustom: { it: 'Aggiungi un’attività non prevista', en: 'Add an unplanned activity' },
+  nome: { it: 'Nome attività', en: 'Activity name' },
+  proc: { it: 'Processo', en: 'Process' },
+  alerts: { it: 'Punti di attenzione', en: 'Attention points' },
+  alOwner: { it: 'attività senza owner', en: 'activities without an owner' },
+  alPlan: { it: 'attività non pianificate sul GANTT', en: 'activities not planned on the GANTT' },
+  alCrit: { it: 'attività in stato critico', en: 'activities flagged critical' },
+  alOk: { it: 'Nessun punto aperto: piano completo e assegnato.', en: 'Nothing open: plan complete and fully assigned.' },
+  workload: { it: 'Carico di lavoro per owner', en: 'Owner workload' },
+  wlAct: { it: 'Attività', en: 'Activities' },
+  wlWeeks: { it: 'Settimane · uomo', en: 'Man · weeks' },
+  day100: { it: 'Day 100', en: 'Day 100' },
+  wClosing: { it: 'Closing', en: 'Closing' },
+  printTitle: { it: 'Stampa PDF del GANTT', en: 'Print GANTT to PDF' },
+  pScope: { it: 'Perimetro', en: 'Scope' },
+  pThis: { it: 'Questa società', en: 'This company' },
+  pAll: { it: 'Tutte le società', en: 'All companies' },
+  pMode: { it: 'Vista', en: 'View' },
+  pFull: { it: 'GANTT totale per società', en: 'Full GANTT by company' },
+  pOwner: { it: 'GANTT per owner (una pagina per persona)', en: 'GANTT by owner (one page per person)' },
+  pGo: { it: 'Genera e stampa', en: 'Generate and print' },
+  annulla: { it: 'Annulla', en: 'Cancel' },
+  fasi: { it: 'Fasi del piano generale: 1 (Day 1-15), 2 (Day 16-30), 3 (Day 31-60), 4 (Day 61-100)', en: 'Master plan phases: 1 (Day 1-15), 2 (Day 16-30), 3 (Day 31-60), 4 (Day 61-100)' },
+  settDal: { it: 'Settimane dal', en: 'Weeks from' },
+  docFooter: { it: 'Toscana Diagnostica S.r.l. · Documento riservato · Integration Plan Management', en: 'Toscana Diagnostica S.r.l. · Confidential · Integration Plan Management' },
+  wk: { it: 'Sett.', en: 'Wk' },
+  progresso: { it: 'Avanzamento', en: 'Progress' },
+  saved: { it: 'Dati salvati in XLSX: un foglio per target, consultabile in Excel. Si ricarica con "Carica dati".', en: 'Data saved to XLSX: one sheet per target, readable in Excel. Reload it with "Load data".' },
+  fineEff: { it: 'Conclusa il', en: 'Completed on' },
+  delTarget: { it: 'Elimina scheda target', en: 'Delete target card' },
+  confermaDel: { it: 'Eliminare definitivamente la scheda di', en: 'Permanently delete the card of' },
+  noDate: { it: 'Per generare il GANTT inserisci una data certa: Preliminare oppure Closing.', en: 'To generate the GANTT enter a firm date: Preliminary or Closing.' },
+  alLate: { it: 'attività concluse oltre la settimana pianificata', en: 'activities completed after the planned week' },
+  ownerActs: { it: 'Attività di', en: 'Activities of' },
+  overlayHint: { it: 'Vista sovrapposta per società: le settimane con più attività in parallelo sono evidenziate nella riga in alto.', en: 'Overlaid view across companies: weeks with several parallel activities are highlighted in the top row.' },
+  dens: { it: 'Attività in parallelo', en: 'Parallel activities' },
+  clickFix: { it: 'clicca per correggere', en: 'click to fix' },
+  importErr: { it: 'File non riconosciuto: carica un XLSX salvato da questa app (o un JSON).', en: 'Unrecognised file: load an XLSX saved by this app (or a JSON).' },
+  drag: { it: 'Trascina ⠿ per riordinare le attività.', en: 'Drag ⠿ to reorder activities.' },
+  sortChrono: { it: '↕ Ordina per data di inizio', en: '↕ Sort by start date' },
+  alignBtn: { it: '⇉ Allinea ownership sulle altre target', en: '⇉ Align ownership across targets' },
+  alignTip: { it: 'Copia Owner e Ownership Support di questa target sulle attività corrispondenti delle altre target, senza toccare il timing', en: 'Copies Owner and Ownership Support from this target onto matching activities of the other targets, leaving timing untouched' },
+  alignConfirm: { it: 'Copio Owner e Ownership Support di questa target sulle attività corrispondenti di TUTTE le altre target. Timing, stato e date non cambiano. Procedo?', en: 'Copy Owner and Ownership Support from this target onto matching activities of ALL other targets. Timing, status and dates stay unchanged. Proceed?' },
+  alignDone: { it: 'Ownership allineata: {n} attività aggiornate su {m} target.', en: 'Ownership aligned: {n} activities updated across {m} targets.' },
+  alignNone: { it: 'Nessuna differenza: le assegnazioni erano già allineate.', en: 'No differences: assignments were already aligned.' },
+  tel: { it: 'Telefono', en: 'Phone' },
+  mail: { it: 'Mail', en: 'Email' },
+  web: { it: 'Sito web', en: 'Website' },
+  pec: { it: 'PEC', en: 'Certified email (PEC)' },
+  ownerBox: { it: 'Owner del piano: ruoli, funzioni e nomi', en: 'Plan owners: roles, functions and names' },
+  ownerBoxHint: { it: 'L’assegnazione dei task usa questo elenco: gli owner sono ruoli, non nomi a caso. Modifica o aggiungi righe; il registro viaggia con i dati salvati.', en: 'Task assignment uses this list: owners are roles, not random names. Edit or add rows; the registry travels with the saved data.' },
+  ruolo: { it: 'Ruolo', en: 'Role' },
+  funzione: { it: 'Funzione', en: 'Function' },
+  manager: { it: 'Manager', en: 'Manager' },
+  nAss: { it: 'Task', en: 'Tasks' },
+  addRole: { it: '+ Aggiungi ruolo', en: '+ Add role' },
+  interna: { it: 'Interna', en: 'Internal' },
+  esterna: { it: 'Esterna', en: 'External' }
+};
+/* ---------------- registro ruoli (da Ruoli.xlsx) ---------------- */
+var TD_TEAM = [
+  { r: 'CEO', f: 'Interna', n: 'Francesco Epifani' },
+  { r: 'Business Back Office Manager', f: 'Interna', n: 'Rosetta Greco' },
+  { r: 'Legal & Compliance', f: 'Esterna', n: 'UFIRM' },
+  { r: 'Retail Manager', f: 'Interna', n: 'Silvia Sansoni' },
+  { r: 'Direzione Sanitaria', f: 'Interna', n: 'Gian Luigi Taddei' },
+  { r: 'Procurement', f: 'Interna', n: 'Valentina Zezza' },
+  { r: 'IT Management', f: 'Esterna', n: 'Hot Bit' },
+  { r: 'HR Manager', f: 'Interna', n: 'Angelica Corradi' },
+  { r: 'CFO', f: 'Interna', n: 'Vincenzo Malenchini' },
+  { r: 'COO', f: 'Interna', n: 'Valentina Zezza' },
+  { r: 'Direzione Commerciale', f: 'Interna', n: 'Francesco Epifani' },
+  { r: 'DPO', f: 'Esterna', n: 'Claudia Del Re' },
+  { r: 'HSQ Manager', f: 'Interna', n: 'Iacopo Cupelli' },
+  { r: 'RSPP', f: 'Interna', n: 'Iacopo Cupelli' },
+  { r: 'Broker Assicurativo', f: 'Esterna', n: 'Cristiano Di Lello' },
+  { r: 'Ingegneria Clinica', f: 'Interna', n: 'Iacopo Cupelli' },
+  { r: 'Medico Competente', f: 'Interna', n: 'Vincenzo Cupelli' }
+];
+function teamName(r) {
+  var m = (STATE.team || []).find(function (x) { return x.r === r; });
+  return m ? m.n : '';
+}
+function T(k) { var d = (ART && I18N[k + '_pub']) || I18N[k]; return d ? (d[LANG] || d.it) : k; }
+function L(v) { return v == null ? '' : (typeof v === 'object' ? (v[LANG] || v.it || '') : v); }
+
+/* ---------------- processi (categorie) ---------------- */
+var PROCS = {
+  gov: { it: 'Governance & Legale', en: 'Governance & Legal', c: 'var(--c-gov)', hex: '#1C505E' },
+  reg: { it: 'Regulatory & Accreditamento', en: 'Regulatory & Accreditation', c: 'var(--c-reg)', hex: '#7E57C2' },
+  hr: { it: 'HR & Persone', en: 'HR & People', c: 'var(--c-hr)', hex: '#B08718' },
+  it: { it: 'IT & Sistemi', en: 'IT & Systems', c: 'var(--c-it)', hex: '#0E7FA0' },
+  fin: { it: 'Finanza & Controllo', en: 'Finance & Control', c: 'var(--c-fin)', hex: '#01212C' },
+  proc: { it: 'Procurement & Facilities', en: 'Procurement & Facilities', c: 'var(--c-proc)', hex: '#2E7D32' },
+  cli: { it: 'Clinico & Qualità', en: 'Clinical & Quality', c: 'var(--c-cli)', hex: '#B3261E' },
+  mkt: { it: 'Comunicazione & Marketing', en: 'Communication & Marketing', c: 'var(--c-mkt)', hex: '#C2185B' },
+  ops: { it: 'Operations', en: 'Operations', c: 'var(--c-ops)', hex: '#45AFD4' }
+};
+
+/* ---------------- catalogo generale (foglio "Adempimenti generali") ---------------- */
+function ga(id, fase, proc, it, en, ow, co, sw, ew) {
+  return { cid: id, fase: fase, proc: proc, it: it, en: en, ow: ow, co: co, sw: sw, ew: ew, gen: true };
+}
+var CAT_GEN = [
+  ga('1.1', 1, 'reg', 'Comunicazione di subentro a Regione e ASL (salvaguardia accreditamento e budget SSN)', 'Takeover notice to Region and ASL (safeguarding accreditation and NHS budget)', 'Legal & Compliance', 'Direzione Sanitaria', 1, 1),
+  ga('1.2', 1, 'cli', 'Conferma o nomina del Direttore Sanitario e comunicazione agli ordini', 'Confirmation or appointment of the Medical Director and notice to professional boards', 'Amministratore Delegato', 'Legal & Compliance', 1, 1),
+  ga('1.3', 1, 'it', 'Subentro credenziali Sistema Tessera Sanitaria e flussi regionali di fatturazione', 'Takeover of the Health Card System credentials and regional billing flows', 'Responsabile IT', 'Direzione Amministrativa', 1, 1),
+  ga('1.4', 1, 'fin', 'Voltura conti correnti dedicati ai rimborsi SSN e aggiornamento firme', 'Transfer of NHS reimbursement bank accounts and signature update', 'CFO', 'Tesoreria', 1, 2),
+  ga('1.5', 1, 'hr', 'Chiusura procedura ex art. 47 L. 428/90 e benvenuto formale al personale', 'Closure of the art. 47 L. 428/90 procedure and formal welcome to staff', 'Direttore HR', 'Amministratore Delegato', 1, 3),
+  ga('2.1', 2, 'gov', 'Nomina del nuovo DPO e aggiornamento del Registro dei Trattamenti (GDPR)', 'Appointment of the new DPO and update of the GDPR processing register', 'Legal & Compliance', 'DPO', 3, 3),
+  ga('2.2', 2, 'cli', 'Aggiornamento timbri, ricettari regionali, consensi informati e carta dei servizi', 'Update of stamps, regional prescription pads, informed consents and service charter', 'Direzione Sanitaria', 'Responsabile Qualità', 3, 4),
+  ga('2.3', 2, 'proc', 'Voltura contratti critici: gas medicinali, rifiuti speciali, energia', 'Transfer of critical contracts: medical gases, special waste, energy', 'Responsabile Acquisti', 'HSE Manager', 3, 5),
+  ga('2.4', 2, 'proc', 'Verifica manutenzioni preventive e controlli di sicurezza apparecchiature (TAC/RMN)', 'Check of preventive maintenance and safety controls on equipment (CT/MRI)', 'Ingegneria Clinica', 'Responsabile Acquisti', 3, 5),
+  ga('3.1', 3, 'hr', 'Censimento crediti ECM e idoneità di medicina del lavoro del personale', 'Census of CME credits and occupational-health fitness of staff', 'Direttore HR', 'Medico Competente', 5, 7),
+  ga('3.2', 3, 'fin', 'Allineamento fatturazione attiva SSN e controllo di gestione sui tetti di spesa', 'Alignment of NHS billing and management control on spending caps', 'Direzione Amministrativa', 'Controllo di Gestione', 5, 8),
+  ga('3.3', 3, 'it', 'Piano di migrazione o integrazione della Cartella Clinica Elettronica', 'Migration or integration plan for the Electronic Health Record', 'Responsabile IT', 'Direzione Sanitaria', 5, 9),
+  ga('3.4', 3, 'proc', 'Rinegoziazione acquisti farmaci e dispositivi con accordi quadro di gruppo', 'Renegotiation of drug and device purchases under group framework agreements', 'Responsabile Acquisti', 'Farmacia Clinica', 5, 9),
+  ga('4.1', 4, 'cli', 'Audit interno su requisiti strutturali, tecnologici e organizzativi (LEA)', 'Internal audit on structural, technological and organisational requirements', 'Responsabile Qualità', 'Direzione Sanitaria', 9, 11),
+  ga('4.2', 4, 'gov', 'Integrazione nella polizza RCT/RCO di Gruppo (Legge Gelli-Bianco)', 'Integration into the Group liability policy (Gelli-Bianco law)', 'Legal & Compliance', 'Broker Assicurativo', 9, 12),
+  ga('4.3', 4, 'mkt', 'Aggiornamento posizionamento del brand e comunicazione a MMG/PLS', 'Brand positioning update and communication to GPs and paediatricians', 'Direttore Marketing', 'Direzione Commerciale', 9, 13),
+  ga('4.4', 4, 'fin', 'Prima rendicontazione economica consolidata ed esame degli scostamenti', 'First consolidated financial report and variance review', 'CFO', 'Amministratore Delegato', 13, 15),
+  ga('G1', 1, 'gov', 'Aggiornamento registro imprese: cariche sociali e variazioni di quote', 'Company register update: officers and share changes', 'Legal & Compliance', '', 1, 1),
+  ga('G2', 1, 'gov', 'Delibere per cambio amministratori e poteri di firma', 'Resolutions for change of directors and signing powers', 'Legal & Compliance', '', 1, 1),
+  ga('G3', 1, 'gov', 'Archiviazione e catalogazione dei documenti firmati del closing', 'Filing and cataloguing of signed closing documents', 'Legal & Compliance', '', 1, 2),
+  ga('G4', 1, 'reg', 'Voltura autorizzazioni sanitarie: istanze a Comune, ASL e Regione', 'Transfer of health authorisations: filings to Municipality, ASL and Region', 'Legal & Compliance', 'Direzione Sanitaria', 1, 3),
+  ga('G5', 1, 'gov', 'Censimento contenziosi in essere e coperture assicurative RCT/RCO', 'Census of pending litigation and liability insurance coverage', 'Legal & Compliance', '', 1, 2),
+  ga('G6', 1, 'fin', 'Pagamenti di conguaglio e monitoraggio earn-out e garanzie contrattuali', 'Balance payments and monitoring of earn-outs and contractual warranties', 'CFO', '', 1, 2),
+  ga('G7', 1, 'mkt', 'Comunicazioni ufficiali ai clienti chiave sulla continuità', 'Official communications to key clients on continuity', 'Direzione Commerciale', '', 1, 2),
+  ga('G8', 2, 'proc', 'Aggiornamento anagrafiche e contratti dei fornitori strategici', 'Update of strategic suppliers records and contracts', 'Responsabile Acquisti', '', 3, 4),
+  ga('G9', 1, 'mkt', 'Comunicazione interna ed esterna (comunicato stampa o note informative)', 'Internal and external communication (press release or notes)', 'Direttore Marketing', '', 1, 1),
+  ga('G10', 3, 'hr', 'Armonizzazione dei contratti del personale (CCNL di riferimento)', 'Harmonisation of staff contracts (reference collective agreements)', 'Direttore HR', '', 5, 9),
+  ga('G11', 2, 'gov', 'Verifica trasferimento o rinnovo di licenze, permessi e locazioni', 'Check on transfer or renewal of licences, permits and leases', 'Legal & Compliance', '', 3, 5),
+  ga('G12', 3, 'it', 'Migrazione sicura dei dati dei pazienti nel rispetto del GDPR (art. 9)', 'Secure migration of patient data in compliance with GDPR (art. 9)', 'Responsabile IT', 'DPO', 5, 9),
+  ga('G13', 1, 'cli', 'Continuità delle cure: piani terapeutici attivi senza interruzioni', 'Continuity of care: active treatment plans without interruption', 'Direzione Sanitaria', '', 1, 4)
+];
+
+/* ---------------- catalogo operativo TD (dalle schede target) ---------------- */
+function oa(id, proc, it, en) { return { cid: id, fase: 0, proc: proc, it: it, en: en, gen: false }; }
+var CAT_OPS = [
+  oa('O1', 'hr', 'Accoglienza del personale e incontro con medici, specialisti e collaboratori', 'Staff welcome and meeting with physicians, specialists and collaborators'),
+  oa('O2', 'hr', 'Assunzione del personale', 'Staff hiring'),
+  oa('O3', 'mkt', 'Comunicazione a clienti e fornitori sulla continuità con il supporto di TD', 'Communication to clients and suppliers on continuity with TD support'),
+  oa('O4', 'mkt', 'Carte intestate e documenti operativi', 'Letterheads and operating documents'),
+  oa('O5', 'cli', 'Adempimenti in materia di salute e sicurezza nei luoghi di lavoro', 'Workplace health and safety obligations'),
+  oa('O6', 'ops', 'Gestione dell’offerta e del software di gestione', 'Service offering and management software'),
+  oa('O7', 'ops', 'Gestione di agende e flussi dei pazienti', 'Diary management and patient flows'),
+  oa('O8', 'hr', 'Formazione del personale sul gestionale di accettazione post fusione', 'Staff training on the post-merger front-office system'),
+  oa('O9', 'proc', 'Assorbimento fornitori e razionalizzazione del procurement', 'Supplier absorption and procurement rationalisation'),
+  oa('O10', 'proc', 'Ordini con fornitori TD (pricing di gruppo)', 'Orders with TD suppliers (group pricing)'),
+  oa('O11', 'proc', 'Chiusura di tutti i contratti non più in uso', 'Closure of all contracts no longer in use'),
+  oa('O12', 'proc', 'Disdetta contratti con consulenti', 'Termination of consultant contracts'),
+  oa('O13', 'hr', 'Razionalizzazione dell’organico e riorganizzazione delle funzioni', 'Workforce rationalisation and reorganisation of functions'),
+  oa('O14', 'mkt', 'Piano di co-brand (con Wodka Agency)', 'Co-branding plan (with Wodka Agency)'),
+  oa('O15', 'ops', 'Riorganizzazione interna degli spazi', 'Internal reorganisation of spaces'),
+  oa('O16', 'gov', 'Incontro con i proprietari dell’immobile', 'Meeting with the property owners'),
+  oa('O17', 'mkt', 'Meeting e contatti con tutti i clienti', 'Meetings and contacts with all clients'),
+  oa('O18', 'gov', 'Disdetta contratto di locazione e rilascio dei locali', 'Lease termination and release of premises'),
+  oa('O19', 'gov', 'Fusione della società in Toscana Diagnostica S.r.l.', 'Merger of the company into Toscana Diagnostica S.r.l.'),
+  oa('O20', 'mkt', 'Comunicazioni a enti istituzionali, fornitori e clienti', 'Communications to institutions, suppliers and clients'),
+  oa('O21', 'it', 'Avvio del nuovo software di gestione', 'Go-live of the new management software'),
+  oa('O22', 'hr', 'Formazione del personale su salute e sicurezza', 'Staff training on health and safety'),
+  oa('O23', 'gov', 'Supporto a concordato / trasformazione societaria pre closing', 'Support to pre-closing arrangement / corporate transformation'),
+  oa('O24', 'gov', 'Conclusione dell’integrazione', 'Integration completed')
+];
+var CATALOG = CAT_GEN.concat(CAT_OPS);
+function catById(cid) { for (var i = 0; i < CATALOG.length; i++) if (CATALOG[i].cid === cid) return CATALOG[i]; return null; }
+/* riclassificazione owner di default sui ruoli del registro */
+var ROLE_MAP = { 'Amministratore Delegato': 'CEO', 'Responsabile IT': 'IT Management', 'Direzione Amministrativa': 'CFO',
+  'Tesoreria': 'CFO', 'Direttore HR': 'HR Manager', 'Responsabile Qualità': 'HSQ Manager', 'Responsabile Acquisti': 'Procurement',
+  'HSE Manager': 'RSPP', 'Controllo di Gestione': 'CFO', 'Farmacia Clinica': 'Direzione Sanitaria', 'Direttore Marketing': 'Retail Manager' };
+CAT_GEN.forEach(function (c) { c.ow = ROLE_MAP[c.ow] || c.ow; c.co = ROLE_MAP[c.co] || c.co; });
+
+/* ---------------- seed targets (dal file M&A Integration Plan, bozza 08/2026) ---------------- */
+var AID = 1;
+/* owner UNICO + ownership support (una o piu' funzioni) */
+function act(cid, sw, ew, owners, o) {
+  o = o || {};
+  var c = catById(cid) || {};
+  var arr = owners || (c.ow ? [c.ow].concat(c.co ? [c.co] : []) : []);
+  return { id: 'a' + (AID++), cid: cid, nome: o.nome || null, proc: o.proc || c.proc || 'ops',
+    sw: sw, ew: ew, owner: arr[0] || '', support: arr.slice(1),
+    dett: o.dett || '', note: o.note || '', st: 0, pl: !!o.pl, ms: !!o.ms, lm: 0 };
+}
+function inv(a) { return (a.owner ? [a.owner] : []).concat(a.support || []); }
+function normAtt(a) {
+  if (a.owners) { a.owner = a.owners[0] || ''; a.support = a.owners.slice(1); delete a.owners; }
+  if (!a.support) a.support = [];
+  return a;
+}
+function genActs() { return CAT_GEN.map(function (c) { return act(c.cid, c.sw, c.ew); }); }
+/* riclassificate sui ruoli del registro (Ruoli.xlsx) */
+var FE = 'CEO', VM = 'CFO', SS = 'Retail Manager', RG = 'Business Back Office Manager',
+    VZ = 'Procurement', AC = 'HR Manager', IC = 'RSPP';
+function seedTargets() {
+  AID = 1;
+  return [
+    { id: 'gentras', nome: 'GENTRAS', rs: '', ind: '', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['lab'], loi: '', prelim: '', closing: '2026-09-04', hor: 20,
+      atts: [
+        act('O2', 1, 1, [FE], { dett: 'Silvia Quattrone come dipendente, Valentina Cesati come libero professionista' }),
+        act('O18', 1, 1, [FE, 'COO'], { dett: 'Nessun preavviso richiesto; con Fabiana Masseria', pl: true }),
+        act('O3', 1, 1, [FE, SS]),
+        act('O1', 1, 1, [FE, VZ], { dett: 'Engagement sul progetto. Meeting in laboratorio.' }),
+        act('O9', 2, 2, [FE, VZ]),
+        act('O10', 2, 2, [FE, VZ], { note: 'Effetti diretti sul P&L', pl: true }),
+        act('O12', 2, 2, [FE, VZ]),
+        act('O17', 2, 5, [FE, RG], { dett: 'Con il supporto di Valentina Cesati' }),
+        act('O14', 3, 7, [FE, SS], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O24', 14, 14, [], { ms: true })
+      ].concat(genActs()) },
+    { id: 'cifs', nome: 'CIFS', rs: '', ind: 'Via della Fortezza 6, Firenze', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['spec'], loi: '', prelim: '', closing: '2026-09-04', hor: 24,
+      atts: [
+        act('O16', 1, 1, [FE], { dett: 'Dott.ssa Sestieri Valentina' }),
+        act('O1', 3, 3, [FE, VM], { dett: 'Engagement sul progetto. Meeting in struttura (apericena).' }),
+        act('O4', 1, 1, [FE, SS]),
+        act('O5', 1, 1, [FE, IC]),
+        act('O6', 5, 10, [FE, RG, SS]),
+        act('O7', 5, 10, [FE, RG]),
+        act('O8', 5, 12, [FE, RG, SS]),
+        act('O9', 2, 2, [FE, VM]),
+        act('O10', 7, 12, [VM, VZ], { note: 'Effetti diretti sul P&L', pl: true }),
+        act('O12', 2, 2, [VM, VZ], { pl: true }),
+        act('O15', 3, 3, [VM, VZ]),
+        act('O14', 3, 7, [VM, VZ], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O13', 7, 12, [FE, AC], { pl: true }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O20', 14, 14, [FE, VM, SS]),
+        act('O21', 13, 13, [RG, SS]),
+        act('O22', 14, 20, [AC, IC]),
+        act('O24', 21, 21, [], { ms: true })
+      ].concat(genActs()) },
+    { id: 'biolabor', nome: 'BIOLABOR', rs: 'Biolabor Servizi Sanitari S.r.l.', ind: 'Livorno', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['lab'], loi: '', prelim: '2026-09-04', closing: '2026-10-05', hor: 24,
+      atts: [
+        act('O23', 1, 5, [FE], { dett: 'Supporto alla chiusura del concordato e acquisizione delle quote di Biolabor S.r.l. da parte di Biolabor Servizi Sanitari S.r.l.' }),
+        act('O1', 5, 5, [FE, AC, SS], { dett: 'Engagement sul progetto. Meeting in laboratorio.' }),
+        act('O3', 5, 5, [FE, VM]),
+        act('O4', 5, 5, [FE, SS]),
+        act('O5', 5, 5, [FE, IC]),
+        act('O6', 5, 10, [FE, RG, SS]),
+        act('O14', 3, 7, [SS], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O7', 5, 10, [FE, RG]),
+        act('O8', 5, 12, [FE, RG, SS]),
+        act('O18', 6, 6, [FE, VM], { dett: 'Laboratorio e magazzino di via March, preavviso 90 giorni', note: 'Rilascio previsto 31/01/2027', pl: true }),
+        act('O9', 7, 12, [VM, VZ]),
+        act('O10', 7, 7, [VM, VZ], { dett: 'Pricing inferiore', pl: true }),
+        act('O11', 7, 7, [VM, VZ], { dett: 'Fornitori vari' }),
+        act('O12', 7, 7, [VM, VZ]),
+        act('O13', 7, 12, [FE, AC], { pl: true }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O20', 14, 14, [FE, VM, SS]),
+        act('O21', 13, 13, [RG, SS]),
+        act('O22', 14, 20, [AC, IC]),
+        act('O24', 21, 21, [], { ms: true })
+      ].concat(genActs()) },
+    { id: 'bioscienze', nome: 'BIO SCIENZE', rs: '', ind: 'Borgo San Lorenzo (FI)', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['lab', 'spec'], loi: '', prelim: '2026-09-04', closing: '2026-10-05', hor: 24,
+      atts: [
+        act('O23', 1, 5, [FE], { dett: 'Supporto alla trasformazione in S.r.l. gestita da professionista della cedente' }),
+        act('O1', 5, 5, [FE, AC, SS], { dett: 'Engagement sul progetto. Meeting in laboratorio.' }),
+        act('O3', 5, 5, [FE, VM]),
+        act('O4', 5, 5, [FE, SS]),
+        act('O5', 5, 5, [FE, IC]),
+        act('O6', 5, 10, [FE, RG, SS]),
+        act('O14', 3, 7, [SS], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O7', 5, 10, [FE, RG]),
+        act('O8', 5, 12, [FE, RG, SS]),
+        act('nuova', 5, 16, [FE, RG], { nome: { it: 'Lavori di adeguamento dei locali per nuova RM 1.5/3T', en: 'Premises works for the new 1.5/3T MRI' }, proc: 'ops' }),
+        act('O9', 7, 12, [VM, VZ]),
+        act('O10', 7, 7, [VM, VZ], { dett: 'Pricing inferiore', pl: true }),
+        act('O11', 7, 7, [VM, VZ]),
+        act('O12', 7, 7, [VM, VZ]),
+        act('O13', 7, 12, [FE, AC], { pl: true }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O20', 14, 14, [FE, VM, SS]),
+        act('O21', 13, 13, [RG, SS]),
+        act('O22', 14, 20, [AC, IC]),
+        act('O24', 21, 21, [], { ms: true })
+      ].concat(genActs()) },
+    { id: 'labronica', nome: 'LABRONICA', rs: '', ind: 'Livorno', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['lab'], loi: '', prelim: '2026-09-04', closing: '2026-10-05', hor: 24,
+      atts: [
+        act('O23', 1, 1, [FE], { dett: 'Supporto alla trasformazione in S.r.l. con professionista interno' }),
+        act('O2', 5, 5, [FE], { dett: 'Milena Monti, Valeria Momini' }),
+        act('O1', 5, 5, [FE, SS, VZ], { dett: 'Engagement sul progetto. Meeting in laboratorio.' }),
+        act('O3', 5, 5, [FE, SS]),
+        act('O9', 6, 6, []),
+        act('O10', 6, 6, [], { pl: true }),
+        act('O11', 6, 6, [], { dett: 'Fornitori vari' }),
+        act('O12', 6, 6, [], { pl: true }),
+        act('O6', 5, 10, [FE, RG, SS]),
+        act('O7', 5, 10, [FE, RG]),
+        act('O8', 5, 12, [FE, RG, SS]),
+        act('O17', 6, 9, [], { dett: 'Con il supporto di Milena Monti' }),
+        act('O14', 6, 10, [SS], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O20', 14, 14, [FE, VM, SS]),
+        act('O21', 13, 13, [RG, SS]),
+        act('O22', 14, 20, [AC, IC]),
+        act('O24', 21, 21, [], { ms: true })
+      ].concat(genActs()) },
+    { id: 'cor', nome: 'COR', rs: '', ind: 'Via Giano della Bella 6, Firenze', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+      linee: ['spec', 'img'], loi: '', prelim: '', closing: '2026-09-04', hor: 24,
+      atts: [
+        act('O16', 1, 1, [FE], { dett: 'Dott.ssa Sestieri Valentina' }),
+        act('O1', 1, 1, [FE, AC, SS], { dett: 'Engagement sul progetto. Meeting in struttura (apericena).' }),
+        act('O4', 1, 1, [FE, SS]),
+        act('O5', 1, 1, [FE, IC]),
+        act('O6', 5, 10, [FE, RG, SS]),
+        act('O7', 5, 10, [FE, RG]),
+        act('O8', 5, 12, [FE, RG, SS]),
+        act('O9', 2, 2, [FE, VM]),
+        act('O10', 7, 12, [VM, VZ], { pl: true }),
+        act('O12', 2, 2, [VM, VZ], { pl: true }),
+        act('O15', 3, 3, [VM, VZ]),
+        act('O14', 3, 7, [VM, VZ], { dett: 'Con il supporto di Wodka Agency' }),
+        act('O13', 7, 12, [FE, AC], { pl: true }),
+        act('O19', 13, 13, [FE], { ms: true }),
+        act('O20', 14, 14, [FE, VM, SS]),
+        act('O21', 13, 13, [RG, SS]),
+        act('O22', 14, 20, [AC, IC]),
+        act('O24', 21, 21, [], { ms: true })
+      ].concat(genActs()) }
+  ];
+}
+/* ordine cronologico per settimana di inizio (le non pianificate in coda), stabile */
+function sortActs(t) {
+  t.atts = t.atts.map(function (a, i) { return [a, i]; }).sort(function (x, y) {
+    var a = x[0], b = y[0];
+    var ka = a.sw ? a.sw : 9999, kb = b.sw ? b.sw : 9999;
+    if (ka !== kb) return ka - kb;
+    var ea = a.ew || 0, eb = b.ew || 0;
+    if (ea !== eb) return ea - eb;
+    return x[1] - y[1];
+  }).map(function (p) { return p[0]; });
+}
+function sortChrono(tid) { sortActs(tg(tid)); render(); }
+/* allineamento ownership tra target: copia owner+support dalla target corrente
+   alle attività corrispondenti delle altre, SENZA toccare timing, stato e date */
+function alignKey(a) {
+  if (a.cid && a.cid !== 'nuova' && !a.nome) return 'c:' + a.cid;
+  var n = a.nome;
+  if (n && typeof n === 'object') n = n.it || n.en || '';
+  return 'n:' + String(n || a.cid || '').trim().toLowerCase();
+}
+function alignOwnership(tid) {
+  var src = tg(tid);
+  if (!src) return;
+  tdConfirm(T('alignConfirm'), function () { alignOwnershipDo(src); });
+}
+function alignOwnershipDo(src) {
+  var map = {};
+  src.atts.forEach(function (a) { if (!a.ms) map[alignKey(a)] = a; });
+  var nAtt = 0, nTg = 0;
+  STATE.targets.forEach(function (t) {
+    if (t.id === src.id) return;
+    var touched = 0;
+    t.atts.forEach(function (a) {
+      if (a.ms) return;
+      var s = map[alignKey(a)];
+      if (!s) return;
+      var ns = (s.support || []).slice();
+      if (a.owner !== s.owner || (a.support || []).join('|') !== ns.join('|')) {
+        a.owner = s.owner; a.support = ns; touch(a); touched++;
+      }
+    });
+    if (touched) { nTg++; nAtt += touched; }
+  });
+  save(); render();
+  tdAlert(nAtt ? T('alignDone').replace('{n}', nAtt).replace('{m}', nTg) : T('alignNone'));
+}
+var STATE = { targets: seedTargets(), team: JSON.parse(JSON.stringify(TD_TEAM)), page: 'cover',
+  meta: { rev: 0, savedBy: '', savedAt: '', log: [] } };
+STATE.targets.forEach(sortActs);
+
+/* --- versione portabile: lo stato viaggia dentro il file --- */
+var DIRTY = false, BOOT_SRC = '', BANNER_OFF = false, FLASH = '', FILE_HANDLE = null, LAST_SAVE_VIA = '';
+/* modalità pagina pubblicata su claude.ai: ART = capability artifact (publish), DL = capability downloads */
+var ART = null, ART_RO = false, DL = null, PUBLISHING = false, BODY_SRC = '';
+function nowIso() { return new Date().toISOString(); }
+function touch(o) { if (o) o.lm = Date.now(); DIRTY = true; }
+function ensureMeta() { if (!STATE.meta) STATE.meta = { rev: 0, savedBy: '', savedAt: '', log: [] }; if (!STATE.meta.log) STATE.meta.log = []; return STATE.meta; }
+
+/* ---------------- utilità ---------------- */
+function byId(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function mondayOf(x) {
+  if (!x) return null;
+  var d = x instanceof Date ? new Date(x) : new Date(x + 'T12:00:00');
+  var day = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - day);
+  return d;
+}
+function addW(d, w) { var x = new Date(d); x.setDate(x.getDate() + w * 7); return x; }
+function fmtD(d) {
+  if (!d) return '';
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function fmtDY(d) { return fmtD(d) + '/' + String(d.getFullYear()).slice(2); }
+/* data certa: preliminare oppure closing; senza date il GANTT non parte */
+function startDate(t) { return mondayOf(t.prelim || t.closing); }
+function weekOfDate(t, dstr) {
+  var sd = startDate(t); if (!sd || !dstr) return null;
+  return Math.floor((mondayOf(dstr) - sd) / (7 * 864e5)) + 1;
+}
+function fmtMil(v) {
+  var n = parseInt(String(v).replace(/[^\d-]/g, ''), 10);
+  return isNaN(n) ? '' : n.toLocaleString('it-IT');
+}
+function actName(a) { var c = catById(a.cid); return a.nome ? L(a.nome) : (c ? L({ it: c.it, en: c.en }) : ''); }
+function tProgress(t) {
+  var n = t.atts.length, done = 0;
+  t.atts.forEach(function (a) { if (a.st === 2) done++; });
+  return n ? done / n : 0;
+}
+function allOwners() {
+  var s = {};
+  (STATE.team || []).forEach(function (m) { if (m.r) s[m.r] = 1; });
+  STATE.targets.forEach(function (t) { t.atts.forEach(function (a) { inv(a).forEach(function (o) { if (o) s[o] = 1; }); }); });
+  return Object.keys(s).sort();
+}
+function refreshOwnlist() {
+  var dl = byId('ownlist');
+  if (dl) dl.innerHTML = allOwners().map(function (o) {
+    var n = teamName(o);
+    return '<option value="' + esc(o) + '"' + (n ? ' label="' + esc(n) + '"' : '') + '>';
+  }).join('');
+}
+function save() {
+  ensureMeta();
+  var ts = DIRTY ? Date.now() : (Date.parse(STATE.meta.savedAt) || 0);
+  try { localStorage.setItem('td_ipm_v3', JSON.stringify({ v: 2, targets: STATE.targets, team: STATE.team, meta: STATE.meta, touchedAt: ts })); } catch (e) {}
+}
+function applyLoaded(d) {
+  if (!d) return false;
+  var ok = false;
+  if (Array.isArray(d)) { if (d.length) { STATE.targets = d; ok = true; } }
+  else if (d.targets && d.targets.length) { STATE.targets = d.targets; if (d.team && d.team.length) STATE.team = d.team; if (d.meta) STATE.meta = d.meta; ok = true; }
+  if (ok) { STATE.targets.forEach(function (t) { (t.atts || []).forEach(normAtt); }); ensureMeta(); }
+  return ok;
+}
+function readEmbed() {
+  try {
+    var el = byId('td-embed'); if (!el) return null;
+    var d = JSON.parse(el.textContent);
+    return d && d.targets && d.targets.length ? d : null;
+  } catch (e) { return null; }
+}
+function tryLoad() {
+  var ls = null, emb = readEmbed();
+  try { ls = JSON.parse(localStorage.getItem('td_ipm_v3')); } catch (e) {}
+  if (ls && (!ls.targets || !ls.targets.length)) ls = null;
+  var lsT = ls ? (ls.touchedAt || 0) : 0;
+  var embT = emb && emb.meta && emb.meta.savedAt ? (Date.parse(emb.meta.savedAt) || 0) : 0;
+  if (emb && ls) {
+    if (lsT > embT) { applyLoaded(ls); BOOT_SRC = 'localNew'; DIRTY = true; }
+    else { applyLoaded(emb); BOOT_SRC = 'file'; }
+  } else if (emb) { applyLoaded(emb); BOOT_SRC = 'file'; }
+  else if (ls) { applyLoaded(ls); BOOT_SRC = 'localOnly'; DIRTY = true; }
+}
+
+/* ---------------- render: nav + pagine ---------------- */
+function render() {
+  var nav = byId('nav');
+  var h = '<button class="' + (STATE.page === 'cover' ? 'on' : '') + '" onclick="go(\'cover\')">🏠 ' + T('cover') + '</button>';
+  STATE.targets.forEach(function (t) {
+    h += '<button class="' + (STATE.page === t.id ? 'on' : '') + '" onclick="go(\'' + t.id + '\')">' + esc(t.nome || '?') + '</button>';
+  });
+  h += '<span class="sp"></span>';
+  h += '<span class="syncchip ' + (DIRTY ? 'warn' : 'ok') + '" title="' + T('rev') + ' ' + (ensureMeta().rev || 0) + '"><span class="dot"></span>' + T(DIRTY ? 'chipDirty' : 'chipSync') + '</span>';
+  if (!ART_RO) h += '<button class="navsave" onclick="saveToFile()">💾 ' + T('saveFile') + '</button>';
+  h += '<button onclick="addTarget()">' + T('newTarget') + '</button>';
+  h += '<button onclick="exportJSON()">📊 ' + T('export_') + '</button>';
+  h += '<button onclick="byId(\'impfile\').click()">📂 ' + T('import_') + '</button>';
+  h += '<button onclick="byId(\'mrgfile\').click()">⇪ ' + T('mergeBtn') + '</button>';
+  h += '<button onclick="openPrint()">🖨 ' + T('print') + '</button>';
+  nav.innerHTML = h;
+  renderBanner();
+  byId('h-title').innerHTML = LANG === 'it' ? 'Integration <span class="hl">Plan Management</span>' : 'Integration <span class="hl">Plan Management</span>';
+  byId('h-sub').textContent = T('sub');
+  var m = byId('main');
+  if (STATE.page === 'cover') renderCover(m); else renderTarget(m, STATE.targets.find(function (t) { return t.id === STATE.page; }));
+  save();
+}
+function go(p) { STATE.page = p; render(); window.scrollTo(0, 0); }
+
+/* ---------------- copertina ---------------- */
+function renderCover(m) {
+  var totA = 0, totDone = 0, noOw = 0;
+  STATE.targets.forEach(function (t) {
+    totA += t.atts.length;
+    t.atts.forEach(function (a) { if (a.st === 2) totDone++; if (!a.owner) noOw++; });
+  });
+  var h = '<div class="tiles" style="margin-bottom:14px">' +
+    '<div class="tile dark"><div class="lab">' + T('targets') + '</div><div class="val">' + STATE.targets.length + '</div><div class="sub">Phase 1</div></div>' +
+    '<div class="tile"><div class="lab">' + T('totAct') + '</div><div class="val">' + totA + '</div></div>' +
+    '<div class="tile"><div class="lab">' + T('avgDone') + '</div><div class="val">' + Math.round(totA ? totDone / totA * 100 : 0) + '%</div></div>' +
+    '<div class="tile"><div class="lab">' + T('noOwner') + '</div><div class="val" style="color:' + (noOw ? 'var(--crit)' : 'var(--good)') + '">' + noOw + '</div></div>' +
+    '<div class="tile"><div class="lab">' + T('closingWin') + '</div><div class="val" style="font-size:15px">set - ott 2026</div></div></div>';
+  h += '<div class="card"><h3>' + T('targets') + '</h3><div class="tcards">';
+  STATE.targets.forEach(function (t) {
+    var p = Math.round(tProgress(t) * 100);
+    var cd = t.closing ? fmtDY(new Date(t.closing + 'T12:00:00')) : '-';
+    h += '<div class="tcard" onclick="go(\'' + t.id + '\')"><div class="tn">' + esc(t.nome) + '</div>' +
+      '<div class="ti">' + esc(t.rs || '') + (t.ind ? ' · ' + esc(t.ind) : '') + '</div>' +
+      '<div class="pbar"><i style="width:' + p + '%"></i></div>' +
+      '<div class="meta"><span>' + t.atts.length + ' ' + T('wlAct').toLowerCase() + ' · ' + p + '%</span><span>' + T('closing') + ': <b>' + cd + '</b></span></div>' +
+      '<div style="margin-top:8px"><span class="badge canary">' + T('openCard') + ' →</span></div></div>';
+  });
+  h += '</div><div class="note" style="margin-top:10px">' + T('fasi') + '</div></div>';
+  /* registro revisioni del file */
+  var mlog = ensureMeta().log || [];
+  h += '<div class="card" style="margin-top:14px"><h3>🗂 ' + T('revLog') + '</h3>' +
+    (mlog.length ? '<table class="revlog" style="border-collapse:collapse;width:100%">' + mlog.slice(0, 10).map(function (e) {
+      var d = e.at ? new Date(e.at) : null;
+      return '<tr><td class="r">' + T('rev') + ' ' + e.rev + '</td><td>' + esc(e.by || '-') + '</td><td>' +
+        (d ? fmtDY(d) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') : '-') + '</td></tr>';
+    }).join('') + '</table>' : '<div class="note">' + T('revNone') + '</div>') + '</div>';
+  /* registro owner: ruoli, funzioni e nomi */
+  var cntO = {}, cntS = {};
+  STATE.targets.forEach(function (t) { t.atts.forEach(function (a) {
+    if (a.owner) cntO[a.owner] = (cntO[a.owner] || 0) + 1;
+    (a.support || []).forEach(function (o) { cntS[o] = (cntS[o] || 0) + 1; });
+  }); });
+  h += '<div class="card"><h3>' + T('ownerBox') + '</h3><div class="note" style="margin-bottom:8px">' + T('ownerBoxHint') + '</div>' +
+    '<div class="tbl-wrap"><table class="wl"><thead><tr><th>' + T('ruolo') + '</th><th>' + T('funzione') + '</th><th>' + T('manager') + '</th><th>' + T('nAss') + '</th><th></th></tr></thead><tbody>';
+  (STATE.team || []).forEach(function (mrow, i) {
+    h += '<tr>' +
+      '<td style="text-align:left"><input style="border:1px solid var(--line);border-radius:7px;padding:4px 7px;font:inherit;font-weight:700;color:var(--jet);width:100%" value="' + esc(mrow.r) + '" onchange="edTeam(' + i + ',\'r\',this.value)"></td>' +
+      '<td style="text-align:left"><select style="border:1px solid var(--line);border-radius:7px;padding:4px;font:inherit" onchange="edTeam(' + i + ',\'f\',this.value)">' +
+      '<option ' + (mrow.f === 'Interna' ? 'selected' : '') + ' value="Interna">' + T('interna') + '</option>' +
+      '<option ' + (mrow.f === 'Esterna' ? 'selected' : '') + ' value="Esterna">' + T('esterna') + '</option></select></td>' +
+      '<td style="text-align:left"><input style="border:1px solid var(--line);border-radius:7px;padding:4px 7px;font:inherit;width:100%" value="' + esc(mrow.n) + '" onchange="edTeam(' + i + ',\'n\',this.value)"></td>' +
+      '<td><span class="badge ' + (cntO[mrow.r] || cntS[mrow.r] ? 'info' : 'warn') + '" title="Owner + Support">' + (cntO[mrow.r] || 0) + ' + ' + (cntS[mrow.r] || 0) + 'S</span></td>' +
+      '<td><button class="btn mini danger" onclick="delTeam(' + i + ')">✕</button></td></tr>';
+  });
+  h += '</tbody></table></div><div style="margin-top:8px"><button class="btn mini ghost" onclick="addTeam()">' + T('addRole') + '</button></div></div>';
+  h += '<div class="card"><h3>' + T('workload') + ' (' + (LANG === 'it' ? 'tutte le società' : 'all companies') + ')</h3>' + workloadTable(null) + '</div>';
+  m.innerHTML = h;
+}
+function edTeam(i, k, v) { STATE.team[i][k] = v; touch(STATE.team[i]); render(); }
+function delTeam(i) { STATE.team.splice(i, 1); render(); }
+function addTeam() { STATE.team.push({ r: '', f: 'Interna', n: '' }); render(); }
+
+/* ---------------- scheda target ---------------- */
+var LINEE = [['lab', 'lin_lab'], ['img', 'lin_img'], ['spec', 'lin_spec'], ['lav', 'lin_lav'], ['chir', 'lin_chir'], ['altro', 'lin_altro']];
+function renderTarget(m, t) {
+  if (!t) { STATE.page = 'cover'; return renderCover(m); }
+  var h = '';
+  /* anagrafica */
+  h += '<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center">' +
+    '<span>' + esc(t.nome) + ' · ' + T('anagrafica') + '</span>' +
+    '<button class="btn mini danger" onclick="delTarget(\'' + t.id + '\')">🗑 ' + T('delTarget') + '</button></h3><div class="frm">' +
+    fld(t, 'nome', LANG === 'it' ? 'Nome breve' : 'Short name') + fld(t, 'rs', T('rs')) + fld(t, 'ind', T('ind')) +
+    fld(t, 'piva', T('piva')) + fld(t, 'ref', T('ref')) + fld(t, 'tel', T('tel')) + fld(t, 'mail', T('mail')) +
+    fld(t, 'web', T('web')) + fld(t, 'pec', T('pec')) + nfld(t, 'fatt', T('fatt')) + nfld(t, 'pfn', T('pfn')) + nfld(t, 'ev', T('ev')) +
+    '</div><div style="margin-top:10px"><label style="font-size:10.5px;text-transform:uppercase;color:var(--ink-3);font-weight:700">' + T('linee') + '</label>' +
+    '<div class="chips" style="margin-top:4px">' + LINEE.map(function (l) {
+      return '<span class="chip ' + (t.linee.indexOf(l[0]) >= 0 ? 'on' : '') + '" onclick="togLinea(\'' + t.id + '\',\'' + l[0] + '\')">' + T(l[1]) + '</span>';
+    }).join('') + '</div></div></div>';
+  /* operazione */
+  var sd = startDate(t);
+  h += '<div class="card"><h3>' + T('operazione') + '</h3><div class="opbox">' +
+    dfld(t, 'loi', T('loi')) + dfld(t, 'prelim', T('prelim')) + dfld(t, 'closing', T('closing')) +
+    '<div class="fld"><label>' + T('orizzonte') + '</label><input type="number" min="8" max="52" value="' + t.hor + '" onchange="setHor(\'' + t.id + '\',this.value)"></div>' +
+    (sd ? '<span class="badge info">' + T('settDal') + ' ' + fmtDY(sd) + '</span>' : '<span class="badge crit">' + T('noDate') + '</span>') + '</div>' +
+    '<div class="note" style="margin-top:6px">' + T('ganttStart') + '</div></div>';
+  /* gantt */
+  h += '<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center"><span>' + T('gantt') + '</span>' +
+    (sd ? '<span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">' +
+      '<button class="btn mini ghost" onclick="sortChrono(\'' + t.id + '\')">' + T('sortChrono') + '</button>' +
+      '<button class="btn mini ghost" title="' + T('alignTip') + '" onclick="alignOwnership(\'' + t.id + '\')">' + T('alignBtn') + '</button></span>' : '') + '</h3>' +
+    (sd ? '<div class="note" style="margin-bottom:8px">' + T('ganttHint') + ' ' + T('drag') + '</div>' + ganttTable(t) + legendHtml()
+        : '<div class="badge crit" style="font-size:13px;padding:10px 16px">' + T('noDate') + '</div>') + '</div>';
+  /* alert + workload */
+  h += '<div class="grid" style="grid-template-columns:1fr 1fr">' +
+    '<div class="card"><h3>' + T('alerts') + '</h3>' + alertsHtml(t) + '</div>' +
+    '<div class="card"><h3>' + T('workload') + '</h3>' + workloadTable(t) + '</div></div>';
+  /* catalogo */
+  h += '<div class="card"><h3>' + T('catalogo') + '</h3><div class="note">' + T('catHint') + '</div>' + catalogHtml(t) +
+    '<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px"><b style="font-size:13px;color:var(--teal)">' + T('addCustom') + '</b>' +
+    '<div class="frm" style="margin-top:6px;grid-template-columns:2fr 1fr 1fr auto">' +
+    '<div class="fld"><label>' + T('nome') + '</label><input id="cust_nome"></div>' +
+    '<div class="fld"><label>' + T('proc') + '</label><select id="cust_proc">' + Object.keys(PROCS).map(function (k) { return '<option value="' + k + '">' + L(PROCS[k]) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fld"><label>Owner</label><select id="cust_ow"><option value="">' + T('nessuno') + '</option>' +
+    allOwners().map(function (r) { return '<option value="' + esc(r) + '">' + esc(r) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fld"><label>&nbsp;</label><button class="btn canary" onclick="addCustom(\'' + t.id + '\')">+ ' + T('add') + '</button></div>' +
+    '</div></div></div>';
+  m.innerHTML = h;
+}
+function fld(t, k, lab) {
+  return '<div class="fld"><label>' + lab + '</label><input value="' + esc(t[k] || '') + '" onchange="setF(\'' + t.id + '\',\'' + k + '\',this.value)"></div>';
+}
+/* campo numerico con separatore delle migliaia (fatturato, PFN, EV) */
+function nfld(t, k, lab) {
+  return '<div class="fld"><label>' + lab + '</label><input value="' + esc(fmtMil(t[k])) + '" inputmode="numeric" onchange="setNF(\'' + t.id + '\',\'' + k + '\',this.value)"></div>';
+}
+function setNF(tid, k, v) {
+  var n = parseInt(String(v).replace(/[^\d-]/g, ''), 10);
+  tg(tid)[k] = isNaN(n) ? '' : n;
+  render();
+}
+function delTarget(tid) {
+  var t = tg(tid);
+  tdConfirm(T('confermaDel') + ' ' + t.nome + '?', function () {
+    STATE.targets = STATE.targets.filter(function (x) { return x.id !== tid; });
+    DIRTY = true;
+    go('cover');
+  });
+}
+function dfld(t, k, lab) {
+  return '<div class="fld"><label>' + lab + '</label><input type="date" value="' + (t[k] || '') + '" onchange="setF(\'' + t.id + '\',\'' + k + '\',this.value)"></div>';
+}
+function setF(tid, k, v) { var t = tg(tid); t[k] = v; touch(t); render(); }
+function setHor(tid, v) { var t = tg(tid); t.hor = Math.max(8, Math.min(52, +v || 24)); touch(t); render(); }
+function togLinea(tid, l) {
+  var t = tg(tid); var i = t.linee.indexOf(l);
+  if (i >= 0) t.linee.splice(i, 1); else t.linee.push(l);
+  render();
+}
+function tg(tid) { return STATE.targets.find(function (t) { return t.id === tid; }); }
+
+/* ---------------- gantt ---------------- */
+var OPEN_EDIT = null;
+function closingWeek(t) {
+  if (!t.closing) return null;
+  var sd = startDate(t); if (!sd) return null;
+  return Math.round((mondayOf(t.closing) - sd) / (7 * 864e5)) + 1;
+}
+function ganttTable(t) {
+  var sd = startDate(t), W = t.hor;
+  var cw = closingWeek(t);
+  var d100 = t.closing ? Math.ceil((Math.round((mondayOf(t.closing) - sd) / (7 * 864e5)) * 7 + 100) / 7) : null;
+  var h = '<div class="gwrap"><table class="gantt"><thead><tr><th class="actcol">' + T('attivita') + '</th>';
+  for (var w = 1; w <= W; w++) {
+    var cls = (w === d100 ? 'm100' : '');
+    var tag = w === cw ? ' ★' : '';
+    h += '<th class="' + cls + '" title="' + (w === d100 ? T('day100') : '') + '">W' + w + tag + '<span class="wd">' + fmtD(addW(sd, w - 1)) + '</span></th>';
+  }
+  h += '</tr></thead><tbody>';
+  /* milestone dell'operazione: Preliminare (se valorizzato) e Closing (sempre, con data) */
+  function msRow(label, dstr, color) {
+    if (!dstr) return '';
+    var wk = weekOfDate(t, dstr);
+    var r = '<tr style="background:#FFFDF2"><td class="actcol" style="background:#FFFDF2">' +
+      '<div class="an" style="color:var(--jet)">◆ ' + label + ' · ' + fmtDY(new Date(dstr + 'T12:00:00')) + '</div>' +
+      '<span class="stato" style="background:var(--canary);color:var(--jet)">Milestone</span></td>';
+    for (var w = 1; w <= W; w++) {
+      r += '<td class="wk" style="cursor:default">' + (w === wk ? '<span class="ms" style="color:' + color + ';font-size:17px">◆</span>' : '') + '</td>';
+    }
+    return r + '</tr>';
+  }
+  h += msRow(T('prelim'), t.prelim, 'var(--teal)');
+  h += msRow(T('closing'), t.closing, 'var(--crit)');
+  t.atts.forEach(function (a) {
+    var col = PROCS[a.proc] ? PROCS[a.proc].hex : '#888';
+    var wDone = a.fine ? weekOfDate(t, a.fine) : null;
+    var late = wDone && a.ew && wDone > a.ew;
+    h += '<tr class="' + (a.st === 2 ? 'done' : '') + '" data-aid="' + a.id + '" ondragover="dragOver(event,this)" ondrop="dragDrop(event,\'' + t.id + '\',\'' + a.id + '\')">' +
+      '<td class="actcol" draggable="true" ondragstart="dragStart(event,\'' + a.id + '\')" onclick="togEdit(\'' + t.id + '\',\'' + a.id + '\')">' +
+      '<div class="an"><span style="color:var(--ink-3);cursor:grab">⠿</span> <span style="color:' + col + '">●</span> ' + esc(actName(a)) + (a.ms ? ' ◆' : '') + (a.pl ? ' <span class="badge warn" style="font-size:9px">P&L</span>' : '') + '</div>' +
+      '<div class="ao">' + (a.owner ? esc(a.owner) : '⚠ ' + (LANG === 'it' ? 'owner da assegnare' : 'owner to assign')) +
+      ((a.support || []).length ? ' <span style="color:var(--ink-3);font-weight:500">+ ' + esc(a.support.join(', ')) + '</span>' : '') + '</div>' +
+      (a.dett ? '<div class="ad">' + esc(a.dett) + '</div>' : '') +
+      '<span class="stato st' + a.st + '">' + T('st' + a.st) + '</span>' +
+      (a.fine ? ' <span class="stato ' + (late ? 'st3' : 'st2') + '">✓ ' + fmtDY(new Date(a.fine + 'T12:00:00')) + '</span>' : '') + '</td>';
+    var barEnd = Math.max(a.ew || 0, wDone || 0);
+    for (var w = 1; w <= W; w++) {
+      var inPlan = a.sw && w >= a.sw && w <= a.ew;
+      var inLate = late && w > a.ew && w <= wDone;
+      var inbar = inPlan || inLate;
+      var cls = inbar ? 'fill ' + (a.sw === barEnd ? 'startend' : w === a.sw ? 'start' : w === barEnd ? 'end' : '') : '';
+      var style = inPlan ? 'background:' + col + (a.st === 2 ? '55' : '') + ';'
+                : inLate ? 'background:' + col + '40;border-bottom:2.5px solid var(--crit);' : '';
+      var mark = (a.ms && inPlan && w === a.sw ? '<span class="ms">◆</span>' : '') +
+        (wDone && w === wDone ? '<span class="ms" style="color:' + (late ? 'var(--crit)' : 'var(--good)') + '">✓</span>' : '');
+      h += '<td class="wk ' + cls + '" style="' + style + '" onclick="cellClick(\'' + t.id + '\',\'' + a.id + '\',' + w + ')">' + mark + '</td>';
+    }
+    h += '</tr>';
+    if (OPEN_EDIT === a.id) h += editRow(t, a, W);
+  });
+  h += '</tbody></table></div>';
+  return h;
+}
+/* drag & drop riordino attivita' */
+var DRAG_AID = null;
+function dragStart(ev, aid) { DRAG_AID = aid; OPEN_EDIT = null; ev.dataTransfer.effectAllowed = 'move'; }
+function dragOver(ev, tr) { if (DRAG_AID) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; } }
+function dragDrop(ev, tid, aid) {
+  ev.preventDefault();
+  if (!DRAG_AID || DRAG_AID === aid) { DRAG_AID = null; return; }
+  var t = tg(tid);
+  var from = t.atts.findIndex(function (x) { return x.id === DRAG_AID; });
+  var to = t.atts.findIndex(function (x) { return x.id === aid; });
+  if (from < 0 || to < 0) { DRAG_AID = null; return; }
+  var moved = t.atts.splice(from, 1)[0];
+  t.atts.splice(to, 0, moved);
+  DRAG_AID = null;
+  DIRTY = true;
+  render();
+}
+function editRow(t, a, W) {
+  return '<tr class="aedit"><td colspan="' + (W + 1) + '"><div class="frm">' +
+    '<div class="fld" style="grid-column:span 2"><label>' + T('attivita') + '</label><input value="' + esc(actName(a)) + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'nome\',this.value)"></div>' +
+    '<div class="fld"><label>' + T('owners') + '</label><select onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'owner\',this.value)">' +
+    '<option value="">' + T('nessuno') + '</option>' +
+    allOwners().map(function (r) { return '<option ' + (a.owner === r ? 'selected' : '') + ' value="' + esc(r) + '">' + esc(r) + (teamName(r) ? ' · ' + esc(teamName(r)) : '') + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fld"><label>' + T('support') + '</label><details class="msdd"><summary>' + ((a.support || []).length ? esc(a.support.join(', ')) : T('selSupport')) + '</summary><div class="msdd-list">' +
+    allOwners().map(function (r) {
+      var on = (a.support || []).indexOf(r) >= 0;
+      return '<span class="chip ' + (on ? 'on' : '') + '" onclick="togSupport(\'' + t.id + '\',\'' + a.id + '\',\'' + esc(r).replace(/'/g, "\\'") + '\')">' + esc(r) + '</span>';
+    }).join('') + '</div></details></div>' +
+    '<div class="fld"><label>' + T('proc') + '</label><select onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'proc\',this.value)">' +
+    Object.keys(PROCS).map(function (k) { return '<option value="' + k + '" ' + (a.proc === k ? 'selected' : '') + '>' + L(PROCS[k]) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fld"><label>' + T('status') + '</label><select onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'st\',this.value)">' +
+    [0, 1, 2, 3].map(function (s) { return '<option value="' + s + '" ' + (a.st === s ? 'selected' : '') + '>' + T('st' + s) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fld"><label>' + T('sw') + '</label><input type="number" min="0" max="' + W + '" value="' + (a.sw || 0) + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'sw\',this.value)"></div>' +
+    '<div class="fld"><label>' + T('ew') + '</label><input type="number" min="0" max="' + W + '" value="' + (a.ew || 0) + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'ew\',this.value)"></div>' +
+    '<div class="fld" style="grid-column:span 2"><label>' + T('dett') + '</label><input value="' + esc(a.dett || '') + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'dett\',this.value)"></div>' +
+    '<div class="fld" style="grid-column:span 2"><label>' + T('note') + '</label><input value="' + esc(a.note || '') + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'note\',this.value)"></div>' +
+    '<div class="fld"><label>' + T('fineEff') + '</label><input type="date" value="' + (a.fine || '') + '" onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'fine\',this.value)"></div>' +
+    '<div class="fld"><label>' + T('pl') + '</label><input type="checkbox" style="width:20px" ' + (a.pl ? 'checked' : '') + ' onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'pl\',this.checked)"></div>' +
+    '<div class="fld"><label>' + T('ms') + '</label><input type="checkbox" style="width:20px" ' + (a.ms ? 'checked' : '') + ' onchange="edA(\'' + t.id + '\',\'' + a.id + '\',\'ms\',this.checked)"></div>' +
+    '</div><div style="margin-top:8px;display:flex;gap:8px">' +
+    '<button class="btn mini ghost" onclick="togEdit(\'' + t.id + '\',null)">' + T('chiudi') + '</button>' +
+    '<button class="btn mini danger" onclick="delA(\'' + t.id + '\',\'' + a.id + '\')">🗑 ' + T('del') + '</button></div></td></tr>';
+}
+function togEdit(tid, aid) { OPEN_EDIT = (OPEN_EDIT === aid ? null : aid); render(); }
+function edA(tid, aid, k, v) {
+  var a = tg(tid).atts.find(function (x) { return x.id === aid; });
+  if (k === 'owner') a.owner = v;
+  else if (k === 'nome') a.nome = v;
+  else if (k === 'sw' || k === 'ew') { a[k] = Math.max(0, +v || 0); if (a.sw && a.ew < a.sw) a.ew = a.sw; }
+  else if (k === 'st') { a.st = +v; if (a.st !== 2) a.fine = ''; }
+  else if (k === 'fine') { a.fine = v; if (v) a.st = 2; else if (a.st === 2) a.st = 1; }
+  else a[k] = v;
+  touch(a);
+  render();
+}
+function togSupport(tid, aid, r) {
+  var a = tg(tid).atts.find(function (x) { return x.id === aid; });
+  a.support = a.support || [];
+  var i = a.support.indexOf(r);
+  if (i >= 0) a.support.splice(i, 1); else a.support.push(r);
+  touch(a);
+  render();
+  var dd = document.querySelector('.aedit details.msdd');
+  if (dd) dd.open = true;
+}
+function delA(tid, aid) {
+  var t = tg(tid);
+  t.atts = t.atts.filter(function (x) { return x.id !== aid; });
+  DIRTY = true;
+  OPEN_EDIT = null; render();
+}
+function cellClick(tid, aid, w) {
+  var a = tg(tid).atts.find(function (x) { return x.id === aid; });
+  if (!a.sw) { a.sw = a.ew = w; }
+  else if (w < a.sw) a.sw = w;
+  else if (w > a.ew) a.ew = w;
+  else if (a.sw === a.ew && w === a.sw) { a.sw = a.ew = 0; }
+  else if (w === a.sw) a.sw++;
+  else if (w === a.ew) a.ew--;
+  else a.ew = w;
+  touch(a);
+  render();
+}
+function legendHtml() {
+  return '<div class="legend">' + Object.keys(PROCS).map(function (k) {
+    return '<span class="it"><span class="sw" style="background:' + PROCS[k].hex + '"></span>' + L(PROCS[k]) + '</span>';
+  }).join('') + '<span class="it">◆ ' + T('ms') + '</span><span class="it">★ ' + T('wClosing') + '</span></div>';
+}
+
+/* ---------------- catalogo ---------------- */
+function catalogHtml(t) {
+  var used = {};
+  t.atts.forEach(function (a) { if (a.cid && a.cid !== 'nuova') used[a.cid] = 1; });
+  var groups = [
+    { tit: { it: 'Adempimenti generali (piano master Day 1-100)', en: 'General obligations (master plan Day 1-100)' }, list: CAT_GEN },
+    { tit: { it: 'Attività operative TD', en: 'TD operating activities' }, list: CAT_OPS }
+  ];
+  return groups.map(function (g) {
+    return '<div class="catgrp"><div class="cgh">' + L(g.tit) + '</div>' + g.list.map(function (c) {
+      var u = used[c.cid];
+      return '<div class="catrow ' + (u ? 'used' : '') + '"><span class="dot" style="background:' + PROCS[c.proc].hex + '"></span>' +
+        '<span class="cn">' + (c.gen ? '<b>' + c.cid + '</b> · ' : '') + esc(L({ it: c.it, en: c.en })) + '</span>' +
+        (u ? '' : '<button class="btn mini ghost" onclick="addFromCat(\'' + t.id + '\',\'' + c.cid + '\')">+ ' + T('add') + '</button>') + '</div>';
+    }).join('') + '</div>';
+  }).join('');
+}
+function addFromCat(tid, cid) {
+  var t = tg(tid), c = catById(cid);
+  var a = act(cid, c.sw || 0, c.ew || 0);
+  a.id = 'cat_' + cid;
+  touch(a);
+  t.atts.push(a);
+  render();
+}
+function addCustom(tid) {
+  var t = tg(tid);
+  var nome = byId('cust_nome').value.trim();
+  if (!nome) return;
+  var a = act('nuova', 0, 0, byId('cust_ow').value ? [byId('cust_ow').value] : [],
+    { nome: nome, proc: byId('cust_proc').value });
+  a.id = 'x' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+  touch(a);
+  t.atts.push(a);
+  OPEN_EDIT = a.id;
+  render();
+}
+function addTarget() {
+  tdPrompt(LANG === 'it' ? 'Nome della nuova target:' : 'New target name:', function (nome) {
+  if (!nome) return;
+  var id = 't' + Date.now();
+  var nt = { id: id, nome: nome, rs: '', ind: '', piva: '', ref: '', fatt: '', pfn: '', ev: '',
+    linee: [], loi: '', prelim: '', closing: '', hor: 24, atts: genActs() };
+  touch(nt);
+  STATE.targets.push(nt);
+  go(id);
+  });
+}
+
+/* ---------------- alert + workload ---------------- */
+function jumpToAct(tid, aid) {
+  STATE.page = tid; OPEN_EDIT = aid; render();
+  var tr = document.querySelector('tr[data-aid="' + aid + '"]');
+  if (tr) tr.scrollIntoView({ block: 'center' });
+}
+function alertsHtml(t) {
+  var noOw = t.atts.filter(function (a) { return !a.owner; });
+  var noPlan = t.atts.filter(function (a) { return !a.sw; }).length;
+  var crit = t.atts.filter(function (a) { return a.st === 3; }).length;
+  var late = t.atts.filter(function (a) { var w = a.fine ? weekOfDate(t, a.fine) : null; return w && a.ew && w > a.ew; }).length;
+  var li = [];
+  if (noOw.length) {
+    li.push('<li><span class="badge crit">' + noOw.length + '</span> ' + T('alOwner') + ' (' + T('clickFix') + '):</li>');
+    noOw.slice(0, 12).forEach(function (a) {
+      li.push('<li style="padding-left:14px">→ <a href="javascript:void(0)" style="color:var(--teal);font-weight:650" onclick="jumpToAct(\'' + t.id + '\',\'' + a.id + '\')">' + esc(actName(a)) + '</a></li>');
+    });
+    if (noOw.length > 12) li.push('<li style="padding-left:14px;color:var(--ink-3)">+ ' + (noOw.length - 12) + '…</li>');
+  }
+  if (noPlan) li.push('<li><span class="badge warn">' + noPlan + '</span> ' + T('alPlan') + '</li>');
+  if (crit) li.push('<li><span class="badge crit">' + crit + '</span> ' + T('alCrit') + '</li>');
+  if (late) li.push('<li><span class="badge warn">' + late + '</span> ' + T('alLate') + '</li>');
+  var p = Math.round(tProgress(t) * 100);
+  var bar = '<div style="margin-bottom:8px"><div style="font-size:11px;color:var(--ink-3)">' + T('progresso') + ': <b>' + p + '%</b></div><div class="pbar"><i style="width:' + p + '%"></i></div></div>';
+  return bar + (li.length ? '<ul class="alerts" style="margin:0;padding-left:4px;list-style:none">' + li.join('') + '</ul>'
+    : '<div class="badge good">✓ ' + T('alOk') + '</div>');
+}
+var WL_OPEN = null;
+function togWL(o) { WL_OPEN = (WL_OPEN === o ? null : o); render(); }
+function workloadTable(t) {
+  var rows = {};
+  var list = t ? [t] : STATE.targets;
+  list.forEach(function (tt) {
+    tt.atts.forEach(function (a) {
+      var dur = a.sw ? (a.ew - a.sw + 1) : 0;
+      inv(a).forEach(function (o, oi) {
+        if (!rows[o]) rows[o] = { n: 0, s: 0, w: 0, acts: [] };
+        if (oi === 0) rows[o].n++; else rows[o].s++;
+        rows[o].w += dur;
+        rows[o].acts.push({ t: tt, a: a, sup: oi > 0 });
+      });
+    });
+  });
+  var ks = Object.keys(rows).sort(function (a, b) { return rows[b].w - rows[a].w; });
+  if (!ks.length) return '<div class="note">-</div>';
+  var max = rows[ks[0]].w || 1;
+  var h = '<table class="wl"><thead><tr><th>Owner</th><th>' + T('wlAct') + '</th><th>Support</th><th>' + T('wlWeeks') + '</th><th style="width:28%"></th></tr></thead><tbody>';
+  ks.forEach(function (k) {
+    var nm = teamName(k);
+    h += '<tr style="cursor:pointer" onclick="togWL(\'' + esc(k).replace(/'/g, "\\'") + '\')"><td>' + (WL_OPEN === k ? '▾' : '▸') + ' <b>' + esc(k) + '</b>' + (nm ? ' <span style="color:var(--ink-3)">· ' + esc(nm) + '</span>' : '') + '</td><td>' + rows[k].n + '</td><td>' + rows[k].s + '</td><td>' + rows[k].w + '</td>' +
+      '<td><div class="pbar"><i style="width:' + Math.round(rows[k].w / max * 100) + '%"></i></div></td></tr>';
+    if (WL_OPEN === k) {
+      h += '<tr><td colspan="5" style="background:#F7FAFA;padding:8px 10px"><div style="font-size:11px;color:var(--ink-3);margin-bottom:4px">' + T('ownerActs') + ' ' + esc(k) + ':</div>' +
+        rows[k].acts.map(function (x) {
+          return '<div style="font-size:12px;margin:2px 0">→ <b>' + esc(x.t.nome) + '</b> · <a href="javascript:void(0)" style="color:var(--teal)" onclick="jumpToAct(\'' + x.t.id + '\',\'' + x.a.id + '\')">' + esc(actName(x.a)) + '</a>' +
+            (x.sup ? ' <span class="badge info" style="font-size:9px">SUPPORT</span>' : '') +
+            (x.a.sw ? ' <span style="color:var(--ink-3)">(W' + x.a.sw + '-W' + x.a.ew + ')</span>' : '') +
+            ' <span class="stato st' + x.a.st + '">' + T('st' + x.a.st) + '</span></div>';
+        }).join('') + '</td></tr>';
+    }
+  });
+  return h + '</tbody></table>';
+}
+
+/* ---------------- stampa ---------------- */
+function openPrint() {
+  var sel = byId('pr_owner');
+  sel.innerHTML = '<option value="*">' + (LANG === 'it' ? 'Tutti gli owner' : 'All owners') + '</option>' +
+    allOwners().map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
+  byId('pm_t').textContent = T('printTitle');
+  byId('pm_l1').textContent = T('pScope'); byId('pm_l2').textContent = T('pMode');
+  byId('pm_o1').textContent = T('pThis'); byId('pm_o2').textContent = T('pAll');
+  byId('pm_o3').textContent = T('pFull'); byId('pm_o4').textContent = T('pOwner');
+  byId('pm_c').textContent = T('annulla'); byId('pm_go').textContent = T('pGo');
+  byId('printmodal').classList.add('show');
+}
+function doPrint() {
+  var scope = byId('pr_scope').value, mode = byId('pr_mode').value, owner = byId('pr_owner').value;
+  var list = (scope === 'this' && STATE.page !== 'cover' ? [tg(STATE.page)] : STATE.targets)
+    .filter(function (t) { return startDate(t); });
+  var pa = byId('printarea'), h = '';
+  if (mode === 'full') {
+    list.forEach(function (t) { h += printSec(t, null); });
+  } else if (list.length === 1) {
+    var ows1 = owner === '*' ? ownersOf(list[0]) : [owner];
+    ows1.forEach(function (o) { if (hasOwner(list[0], o)) h += printSec(list[0], o); });
+  } else {
+    /* piu' societa' + per owner: vista sovrapposta su calendario comune */
+    var allOws = owner === '*' ? (function () {
+      var s = {};
+      list.forEach(function (t) { ownersOf(t).forEach(function (o) { s[o] = 1; }); });
+      return Object.keys(s).sort();
+    })() : [owner];
+    allOws.forEach(function (o) { h += printOverlay(list, o); });
+  }
+  pa.innerHTML = h;
+  byId('printmodal').classList.remove('show');
+  setTimeout(function () { window.print(); }, 150);
+}
+/* pagina sovrapposta: tutte le attivita' di un owner su un unico calendario, per vedere le sovrapposizioni */
+function printOverlay(list, owner) {
+  var items = [];
+  var g0 = null;
+  list.forEach(function (t) {
+    var sd = startDate(t);
+    if (!g0 || sd < g0) g0 = sd;
+  });
+  var maxW = 0;
+  list.forEach(function (t) {
+    var off = Math.round((startDate(t) - g0) / (7 * 864e5));
+    t.atts.forEach(function (a) {
+      if (inv(a).indexOf(owner) < 0 || !a.sw) return;
+      items.push({ t: t, a: a, gs: a.sw + off, ge: a.ew + off, sup: a.owner !== owner });
+      if (a.ew + off > maxW) maxW = a.ew + off;
+    });
+  });
+  if (!items.length) return '';
+  var W = Math.min(maxW, 40);
+  items.sort(function (x, y) { return x.gs - y.gs || x.ge - y.ge; });
+  var dens = [];
+  for (var w = 1; w <= W; w++) {
+    dens[w] = items.filter(function (it) { return w >= it.gs && w <= it.ge; }).length;
+  }
+  var h = '<div class="psec"><div class="phead"><div><div class="t1">' + esc(owner) + ' · ' + (LANG === 'it' ? 'tutte le società (vista sovrapposta)' : 'all companies (overlaid view)') + '</div>' +
+    '<div class="t2">' + T('overlayHint') + '</div></div><div class="t2">' + T('docFooter') + ' · ' + fmtDY(new Date()) + '</div></div>';
+  h += '<table class="pgantt"><thead><tr><th style="text-align:left">' + (LANG === 'it' ? 'Società' : 'Company') + '</th><th style="text-align:left">' + T('attivita') + '</th>';
+  for (var w = 1; w <= W; w++) h += '<th>W' + w + '<br>' + fmtD(addW(g0, w - 1)) + '</th>';
+  h += '</tr></thead><tbody>';
+  h += '<tr><td colspan="2" class="acol" style="font-weight:800">' + T('dens') + '</td>';
+  for (var w = 1; w <= W; w++) {
+    var d = dens[w] || 0;
+    h += '<td style="text-align:center;font-weight:800;' + (d >= 3 ? 'background:#B3261E;color:#fff' : d === 2 ? 'background:#F7F052' : '') + '">' + (d || '') + '</td>';
+  }
+  h += '</tr>';
+  /* rombi dei closing di ogni societa' sul calendario comune */
+  var seenT = {};
+  items.forEach(function (it) { seenT[it.t.id] = it.t; });
+  Object.keys(seenT).forEach(function (k) {
+    var t = seenT[k];
+    if (!t.closing) return;
+    var off = Math.round((startDate(t) - g0) / (7 * 864e5));
+    var wk = weekOfDate(t, t.closing) + off;
+    h += '<tr><td class="acol" style="font-weight:800">' + esc(t.nome) + '</td><td class="acol">◆ ' + T('closing') + ' ' + fmtDY(new Date(t.closing + 'T12:00:00')) + '</td>';
+    for (var w = 1; w <= W; w++) h += '<td style="text-align:center;font-weight:800">' + (w === wk ? '◆' : '') + '</td>';
+    h += '</tr>';
+  });
+  items.forEach(function (it) {
+    var col = PROCS[it.a.proc] ? PROCS[it.a.proc].hex : '#888';
+    h += '<tr><td class="acol" style="font-weight:700">' + esc(it.t.nome) + '</td><td class="acol">' + esc(actName(it.a)) + (it.a.pl ? ' [P&L]' : '') +
+      (it.sup ? ' <b>[SUPPORT]</b>' : '') + '</td>';
+    for (var w = 1; w <= W; w++) {
+      var on = w >= it.gs && w <= it.ge;
+      h += '<td class="' + (on ? 'on' : '') + '" style="' + (on ? 'background:' + col : '') + '"></td>';
+    }
+    h += '</tr>';
+  });
+  h += '</tbody></table><div class="plegend">' + (LANG === 'it' ? 'Riga in alto: numero di attività in parallelo per settimana (giallo = 2, rosso = 3 o più). Calendario comune dal ' : 'Top row: parallel activities per week (yellow = 2, red = 3+). Common calendar from ') + fmtDY(g0) + '</div></div>';
+  return h;
+}
+function ownersOf(t) {
+  var s = {};
+  t.atts.forEach(function (a) { inv(a).forEach(function (o) { s[o] = 1; }); });
+  return Object.keys(s).sort();
+}
+function hasOwner(t, o) { return t.atts.some(function (a) { return inv(a).indexOf(o) >= 0; }); }
+function printSec(t, owner) {
+  var sd = startDate(t), W = t.hor;
+  var atts = owner ? t.atts.filter(function (a) { return inv(a).indexOf(owner) >= 0; }) : t.atts;
+  var h = '<div class="psec"><div class="phead"><div><div class="t1">' + esc(t.nome) + (owner ? ' · ' + esc(owner) : '') + '</div>' +
+    '<div class="t2">' + esc(t.rs || '') + ' · ' + T('closing') + ': ' + (t.closing ? fmtDY(new Date(t.closing + 'T12:00:00')) : '-') +
+    (t.prelim ? ' · ' + T('prelim') + ': ' + fmtDY(new Date(t.prelim + 'T12:00:00')) : '') + '</div></div>' +
+    '<div class="t2">' + T('docFooter') + ' · ' + fmtDY(new Date()) + '</div></div>';
+  h += '<table class="pgantt"><thead><tr><th style="text-align:left">' + T('attivita') + '</th><th>Owner</th><th>Support</th>';
+  for (var w = 1; w <= W; w++) h += '<th>W' + w + '<br>' + fmtD(addW(sd, w - 1)) + '</th>';
+  h += '</tr></thead><tbody>';
+  [[T('prelim'), t.prelim], [T('closing'), t.closing]].forEach(function (msp) {
+    if (!msp[1]) return;
+    var wk = weekOfDate(t, msp[1]);
+    h += '<tr><td class="acol" style="font-weight:800">◆ ' + msp[0] + '</td><td class="acol" colspan="2">' + fmtDY(new Date(msp[1] + 'T12:00:00')) + '</td>';
+    for (var w = 1; w <= W; w++) h += '<td style="text-align:center;font-weight:800">' + (w === wk ? '◆' : '') + '</td>';
+    h += '</tr>';
+  });
+  atts.forEach(function (a) {
+    var col = PROCS[a.proc] ? PROCS[a.proc].hex : '#888';
+    h += '<tr><td class="acol">' + (a.ms ? '◆ ' : '') + esc(actName(a)) + (a.pl ? ' [P&L]' : '') + '</td>' +
+      '<td class="acol" style="max-width:80px">' + esc(a.owner || '') + '</td>' +
+      '<td class="acol" style="max-width:80px">' + esc((a.support || []).join(', ')) + '</td>';
+    for (var w = 1; w <= W; w++) {
+      var on = a.sw && w >= a.sw && w <= a.ew;
+      h += '<td class="' + (on ? 'on' : '') + '" style="' + (on ? 'background:' + col : '') + '"></td>';
+    }
+    h += '</tr>';
+  });
+  h += '</tbody></table><div class="plegend">' + Object.keys(PROCS).map(function (k) { return L(PROCS[k]); }).join(' · ') + ' · ◆ ' + T('ms') + '</div></div>';
+  return h;
+}
+
+/* ---------------- export XLSX (zip stored, senza librerie) ---------------- */
+var CRC_T = (function () {
+  var t = [], c;
+  for (var n = 0; n < 256; n++) {
+    c = n;
+    for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(u8) {
+  var c = 0xFFFFFFFF;
+  for (var i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(files) { /* files: [{name, text}] -> Uint8Array (metodo STORED) */
+  var enc = new TextEncoder(), parts = [], central = [], off = 0;
+  function u16(v) { return [v & 255, (v >> 8) & 255]; }
+  function u32(v) { return [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >>> 24) & 255]; }
+  files.forEach(function (f) {
+    var name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    var head = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0),
+      u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
+    parts.push(new Uint8Array(head), name, data);
+    var cen = [].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0),
+      u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0),
+      u32(0), u32(off));
+    central.push(new Uint8Array(cen), name);
+    off += head.length + name.length + data.length;
+  });
+  var cenLen = 0;
+  central.forEach(function (p) { cenLen += p.length; });
+  var end = [].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cenLen), u32(off), u16(0));
+  var tot = off + cenLen + end.length, out = new Uint8Array(tot), p = 0;
+  parts.concat(central, [new Uint8Array(end)]).forEach(function (u) { out.set(u, p); p += u.length; });
+  return out;
+}
+function xesc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function sheetXml(rows) { /* rows: array di array; numeri -> celle numeriche, resto inline string */
+  var body = rows.map(function (r, ri) {
+    return '<row r="' + (ri + 1) + '">' + r.map(function (v, ci) {
+      var ref = colL(ci) + (ri + 1);
+      if (typeof v === 'number' && isFinite(v)) return '<c r="' + ref + '"><v>' + v + '</v></c>';
+      if (v === '' || v == null) return '';
+      return '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + xesc(v) + '</t></is></c>';
+    }).join('') + '</row>';
+  }).join('');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' + body + '</sheetData></worksheet>';
+}
+function colL(i) { var s = ''; i++; while (i) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function sheetName(s) { return String(s).replace(/[\[\]:*?\/\\]/g, ' ').slice(0, 28) || 'Target'; }
+function exportJSON() { /* mantiene il nome storico del bottone: ora salva XLSX */
+  var sheets = [];
+  var sum = [[T('targets')],
+    ['Target', T('rs'), T('ind'), T('piva'), T('ref'), T('tel'), T('mail'), T('web'), T('pec'), T('fatt'), T('pfn'), T('ev'), T('prelim'), T('closing'), T('progresso')]];
+  STATE.targets.forEach(function (t) {
+    sum.push([t.nome, t.rs, t.ind, t.piva, t.ref, t.tel || '', t.mail || '', t.web || '', t.pec || '', +t.fatt || '', +t.pfn || '', +t.ev || '', t.prelim || '', t.closing || '', Math.round(tProgress(t) * 100) + '%']);
+  });
+  sheets.push({ name: 'Riepilogo', rows: sum });
+  var trows = [[T('ownerBox')], [T('ruolo'), T('funzione'), T('manager')]];
+  (STATE.team || []).forEach(function (m) { trows.push([m.r, m.f, m.n]); });
+  sheets.push({ name: 'Ruoli', rows: trows });
+  STATE.targets.forEach(function (t) {
+    var sd = startDate(t);
+    var rows = [[t.nome + ' - GANTT ' + (sd ? T('settDal') + ' ' + fmtDY(sd) : '')],
+      ['ID', T('attivita'), T('proc'), 'Owner', 'Ownership Support', T('sw'), T('ew'), LANG === 'it' ? 'Dal' : 'From', LANG === 'it' ? 'Al' : 'To', T('status'), T('fineEff'), 'P&L', T('ms'), T('dett'), T('note')]];
+    t.atts.forEach(function (a) {
+      rows.push([a.cid || '', actName(a), L(PROCS[a.proc] || {}), a.owner || '', (a.support || []).join(', '),
+        a.sw || '', a.ew || '',
+        sd && a.sw ? fmtDY(addW(sd, a.sw - 1)) : '', sd && a.ew ? fmtDY(new Date(addW(sd, a.ew - 1).getTime() + 6 * 864e5)) : '',
+        T('st' + a.st), a.fine || '', a.pl ? 'X' : '', a.ms ? 'X' : '', a.dett || '', a.note || '']);
+    });
+    sheets.push({ name: sheetName(t.nome), rows: rows });
+  });
+  sheets.push({ name: '_dati', rows: [['NON MODIFICARE - stato applicazione'], ['TD_IPM_STATE:' + JSON.stringify({ v: 2, targets: STATE.targets, team: STATE.team, meta: STATE.meta })]] });
+  var files = [];
+  var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>';
+  var wbs = '', rels = '';
+  sheets.forEach(function (s, i) {
+    var n = i + 1;
+    ct += '<Override PartName="/xl/worksheets/sheet' + n + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+    wbs += '<sheet name="' + xesc(s.name) + '" sheetId="' + n + '" r:id="rId' + n + '"/>';
+    rels += '<Relationship Id="rId' + n + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + n + '.xml"/>';
+    files.push({ name: 'xl/worksheets/sheet' + n + '.xml', text: sheetXml(s.rows) });
+  });
+  ct += '</Types>';
+  files.unshift(
+    { name: '[Content_Types].xml', text: ct },
+    { name: '_rels/.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+    { name: 'xl/workbook.xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + wbs + '</sheets></workbook>' },
+    { name: 'xl/_rels/workbook.xml.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + rels + '</Relationships>' }
+  );
+  var blob = new Blob([zipStore(files)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var fname = 'TD_Integration_Plan_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+  if (DL) {
+    DL.save({ filename: fname, data: blob }).then(function () { FLASH = T('saved'); render(); })
+      .catch(function (e) { if (e && e.code === 'declined') return; tdAlert(T('pubErr')); });
+    return;
+  }
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
+  a.click();
+  tdAlert(T('saved'));
+}
+function importJSON(ev) {
+  var f = ev.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  if (/\.json$/i.test(f.name)) {
+    r.onload = function () {
+      try { if (applyLoaded(JSON.parse(r.result))) { DIRTY = true; STATE.page = 'cover'; render(); return; } } catch (e) {}
+      tdAlert(T('importErr'));
+    };
+    r.readAsText(f);
+  } else {
+    r.onload = function () {
+      try {
+        var u8 = new Uint8Array(r.result), dec = new TextDecoder();
+        var i = 0, found = null;
+        while (i + 30 < u8.length) {
+          var sig = u8[i] | (u8[i + 1] << 8) | (u8[i + 2] << 16) | (u8[i + 3] << 24);
+          if ((sig >>> 0) !== 0x04034b50) break;
+          var csize = u8[i + 18] | (u8[i + 19] << 8) | (u8[i + 20] << 16) | (u8[i + 21] << 24);
+          var nlen = u8[i + 26] | (u8[i + 27] << 8);
+          var elen = u8[i + 28] | (u8[i + 29] << 8);
+          var name = dec.decode(u8.slice(i + 30, i + 30 + nlen));
+          var dstart = i + 30 + nlen + elen;
+          if (name.indexOf('worksheets/') >= 0) {
+            var txt = dec.decode(u8.slice(dstart, dstart + csize));
+            var m = txt.indexOf('TD_IPM_STATE:');
+            if (m >= 0) {
+              var end = txt.indexOf('</t>', m);
+              var raw = txt.slice(m + 13, end).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+              found = JSON.parse(raw);
+            }
+          }
+          i = dstart + csize;
+        }
+        if (applyLoaded(found)) { DIRTY = true; STATE.page = 'cover'; render(); return; }
+      } catch (e) {}
+      tdAlert(T('importErr'));
+    };
+    r.readAsArrayBuffer(f);
+  }
+  ev.target.value = '';
+}
+
+/* ---------------- versione portabile: salvataggio nel file e unione ---------------- */
+function renderBanner() {
+  var el = byId('td-banner'); if (!el) return;
+  var h = '';
+  if (FLASH) h += '<div class="bnr okk">✓ ' + FLASH + '<button class="x" onclick="FLASH=\'\';render()">✕</button></div>';
+  if (ART_RO && !FLASH) h += '<div class="bnr warn">🔒 ' + T('pubRO') + '</div>';
+  if (BOOT_SRC && !BANNER_OFF) {
+    if (BOOT_SRC === 'file') {
+      var m = ensureMeta(), d = m.savedAt ? new Date(m.savedAt) : null;
+      h += '<div class="bnr info">📄 ' + T('srcFile') + (m.rev ? ' · ' + T('rev') + ' ' + m.rev : '') +
+        (m.savedBy ? ' · ' + esc(m.savedBy) : '') +
+        (d ? ' · ' + fmtDY(d) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') : '') +
+        '<button class="x" onclick="BANNER_OFF=true;render()">✕</button></div>';
+    } else {
+      h += '<div class="bnr warn">⚠ ' + T(BOOT_SRC === 'localNew' ? 'srcLocalNew' : 'srcLocalOnly') +
+        '<button class="x" onclick="BANNER_OFF=true;render()">✕</button></div>';
+    }
+  }
+  el.innerHTML = h;
+}
+function captureBodySrc() {
+  /* Sorgente canonica del corpo pagina, catturata al primo avvio (prima di qualsiasi render o iniezione esterna):
+     solo gli elementi autorali, con i contenitori dinamici vuoti. */
+  var ids = ['nav', 'td-banner', 'main', 'ownlist', 'impfile', 'mrgfile', 'printmodal', 'firmamodal', 'printarea'];
+  var parts = [];
+  var hero = document.querySelector('header.hero');
+  if (hero) parts.push(hero.outerHTML);
+  ids.forEach(function (id) {
+    var e = byId(id); if (!e) return;
+    var c = e.cloneNode(true);
+    if (id === 'nav' || id === 'td-banner' || id === 'main' || id === 'ownlist' || id === 'printarea') c.innerHTML = '';
+    if (id === 'printmodal' || id === 'firmamodal') c.classList.remove('show');
+    if (id === 'firmamodal') { var s = c.querySelector('#fm_sel'); if (s) s.innerHTML = '<option value=""></option>'; }
+    parts.push(c.outerHTML);
+  });
+  BODY_SRC = parts.join('\n');
+}
+function buildFileHtml() {
+  ensureMeta();
+  var SC = '<' + '/script>';
+  var title = (document.querySelector('title') || {}).textContent || 'Toscana Diagnostica - Integration Plan Management';
+  var css = (byId('td-style') || {}).textContent || '';
+  var js = (byId('td-main') || {}).textContent || '';
+  var data = JSON.stringify({ v: 2, targets: STATE.targets, team: STATE.team, meta: STATE.meta }).replace(/<\//g, '<\\/');
+  return '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<title>' + esc(title) + '</title>\n<style id="td-style">' + css + '</style>\n</head>\n<body>\n' +
+    BODY_SRC + '\n' +
+    '<script type="application/json" id="td-embed">' + data + SC + '\n' +
+    '<script id="td-main">' + js.replace(/<\/script/gi, '<\\/script') + SC + '\n' +
+    '</body></html>';
+}
+
+function saveToFile() {
+  var last = '';
+  try { last = localStorage.getItem('td_ipm_firma') || ''; } catch (e) {}
+  var opts = (STATE.team || []).map(function (m) { return m.n ? m.n + ' (' + m.r + ')' : m.r; });
+  byId('fm_sel').innerHTML = '<option value=""></option>' + opts.map(function (v) {
+    return '<option' + (v === last ? ' selected' : '') + '>' + esc(v) + '</option>';
+  }).join('');
+  byId('fm_alt').value = (last && opts.indexOf(last) < 0) ? last : '';
+  byId('fm_t').textContent = T('firmaTit'); byId('fm_l1').textContent = T('firmaSel');
+  byId('fm_l2').textContent = T('firmaAlt'); byId('fm_n').textContent = T('firmaNote');
+  byId('fm_c').textContent = T('chiudi'); byId('fm_go').textContent = T('saveFile');
+  byId('firmamodal').classList.add('show');
+}
+function fmGo() {
+  var who = byId('fm_alt').value.trim() || byId('fm_sel').value || '';
+  try { localStorage.setItem('td_ipm_firma', who); } catch (e) {}
+  byId('firmamodal').classList.remove('show');
+  doSaveFile(who);
+}
+function doSaveFile(who) {
+  var m = ensureMeta(), prev = JSON.parse(JSON.stringify(m));
+  m.rev = (m.rev || 0) + 1; m.savedBy = who; m.savedAt = nowIso();
+  m.log = [{ rev: m.rev, by: who, at: m.savedAt }].concat(m.log).slice(0, 30);
+  var html = buildFileHtml();
+  var done = function (via) {
+    LAST_SAVE_VIA = via;
+    DIRTY = false; BOOT_SRC = ''; FLASH = (via === 'fsa' ? T('savedFsa') + ' · ' + T('rev') + ' ' + m.rev : T('savedDl'));
+    save(); render();
+  };
+  if (ART) {
+    /* Pagina pubblicata su claude.ai: la nuova versione della pagina è il salvataggio condiviso col team. */
+    if (PUBLISHING) return;
+    PUBLISHING = true; DIRTY = false; BOOT_SRC = ''; FLASH = T('pubBusy'); save(); render();
+    ART.publish(html).then(function () {
+      LAST_SAVE_VIA = 'pub'; FLASH = T('savedPub') + ' · ' + T('rev') + ' ' + m.rev; save(); render();
+      /* la piattaforma ricarica tutte le viste (questa inclusa) sulla nuova versione */
+    }).catch(function (e) {
+      PUBLISHING = false;
+      var code = e && e.code;
+      if (code === 'conflict') { STATE.meta = prev; DIRTY = true; FLASH = T('pubConflict'); save(); render(); return; }
+      STATE.meta = prev; DIRTY = true;
+      if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared' || code === 'consent_required') { ART_RO = true; FLASH = T('pubRO'); }
+      else FLASH = T('pubErr') + (e && e.message ? ' (' + e.message + ')' : '');
+      save(); render();
+    });
+    return;
+  }
+  var fallback = function () {
+    var blob = new Blob([html], { type: 'text/html' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    var d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    a.download = 'Toscana Diagnostica - Integration Plan Management (agg ' + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + p(d.getMinutes()) + ').html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    done('dl');
+  };
+  if (window.showSaveFilePicker) {
+    var getH = FILE_HANDLE ? Promise.resolve(FILE_HANDLE) : window.showSaveFilePicker({
+      suggestedName: 'Toscana Diagnostica - Integration Plan Management.html',
+      types: [{ description: 'Pagina HTML', accept: { 'text/html': ['.html'] } }]
+    }).then(function (h) { FILE_HANDLE = h; return h; });
+    getH.then(function (h) { return h.createWritable(); })
+      .then(function (w) { return w.write(html).then(function () { return w.close(); }); })
+      .then(function () { done('fsa'); })
+      .catch(function (e) {
+        FILE_HANDLE = null;
+        if (e && e.name === 'AbortError') { STATE.meta = prev; save(); render(); return; }
+        fallback();
+      });
+  } else fallback();
+}
+function stateFromXlsxBytes(u8) {
+  var dec = new TextDecoder(), i = 0;
+  while (i + 30 < u8.length) {
+    var sig = (u8[i] | (u8[i + 1] << 8) | (u8[i + 2] << 16) | (u8[i + 3] << 24)) >>> 0;
+    if (sig !== 0x04034b50) break;
+    var csize = u8[i + 18] | (u8[i + 19] << 8) | (u8[i + 20] << 16) | (u8[i + 21] << 24);
+    var nlen = u8[i + 26] | (u8[i + 27] << 8), elen = u8[i + 28] | (u8[i + 29] << 8);
+    var name = dec.decode(u8.slice(i + 30, i + 30 + nlen));
+    var dstart = i + 30 + nlen + elen;
+    if (name.indexOf('worksheets/') >= 0) {
+      var txt = dec.decode(u8.slice(dstart, dstart + csize));
+      var mk = txt.indexOf('TD_IPM_STATE:');
+      if (mk >= 0) {
+        var end = txt.indexOf('</t>', mk);
+        var raw = txt.slice(mk + 13, end).replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+        try { return JSON.parse(raw); } catch (e) { return null; }
+      }
+    }
+    i = dstart + csize;
+  }
+  return null;
+}
+function stateFromHtmlText(txt) {
+  var m = txt.match(/id="td-embed">([\s\S]*?)<\/script>/);
+  if (!m) return null;
+  try { var d = JSON.parse(m[1]); return d && d.targets && d.targets.length ? d : null; } catch (e) { return null; }
+}
+var T_FIELDS = ['nome', 'rs', 'ind', 'piva', 'ref', 'tel', 'mail', 'web', 'pec', 'fatt', 'pfn', 'ev', 'linee', 'loi', 'prelim', 'closing', 'hor'];
+var A_FIELDS = ['cid', 'nome', 'proc', 'sw', 'ew', 'owner', 'support', 'dett', 'note', 'st', 'fine', 'pl', 'ms', 'lm'];
+function mergeStates(other) {
+  var rep = { aU: 0, aN: 0, tN: 0, gU: 0 };
+  if (!other || !other.targets) return rep;
+  other.targets.forEach(function (ot) {
+    (ot.atts || []).forEach(normAtt);
+    var ct = STATE.targets.find(function (t) { return t.id === ot.id; });
+    if (!ct) { STATE.targets.push(ot); rep.tN++; return; }
+    if ((ot.lm || 0) > (ct.lm || 0)) {
+      T_FIELDS.forEach(function (k) { if (ot[k] !== undefined) ct[k] = Array.isArray(ot[k]) ? ot[k].slice() : ot[k]; });
+      ct.lm = ot.lm; rep.gU++;
+    }
+    var byIdA = {}; ct.atts.forEach(function (a) { byIdA[a.id] = a; });
+    (ot.atts || []).forEach(function (oa) {
+      var ca = byIdA[oa.id];
+      if (!ca) { ct.atts.push(oa); rep.aN++; }
+      else if ((oa.lm || 0) > (ca.lm || 0)) {
+        A_FIELDS.forEach(function (k) { ca[k] = Array.isArray(oa[k]) ? oa[k].slice() : oa[k]; });
+        rep.aU++;
+      }
+    });
+  });
+  (other.team || []).forEach(function (om) {
+    var cm = (STATE.team || []).find(function (x) { return x.r === om.r; });
+    if (!cm) STATE.team.push(om);
+    else if ((om.lm || 0) > (cm.lm || 0)) { Object.keys(om).forEach(function (k) { cm[k] = om[k]; }); }
+  });
+  if (other.meta) {
+    var m = ensureMeta(), om = other.meta;
+    m.rev = Math.max(m.rev || 0, om.rev || 0);
+    var seen = {};
+    m.log = (m.log || []).concat(om.log || []).filter(function (e) {
+      var k = (e.rev || 0) + '|' + (e.at || '') + '|' + (e.by || '');
+      if (seen[k]) return false; seen[k] = 1; return true;
+    }).sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); }).slice(0, 30);
+  }
+  if (rep.aU + rep.aN + rep.tN + rep.gU > 0) DIRTY = true;
+  return rep;
+}
+function mergeFile(ev) {
+  var f = ev.target.files[0]; if (!f) { ev.target.value = ''; return; }
+  var r = new FileReader();
+  r.onload = function () {
+    var u8 = new Uint8Array(r.result), st = null;
+    if (u8[0] === 0x50 && u8[1] === 0x4b) st = stateFromXlsxBytes(u8);
+    else st = stateFromHtmlText(new TextDecoder().decode(u8));
+    if (!st) { tdAlert(T('mergeErr')); return; }
+    var rep = mergeStates(st);
+    save(); render();
+    var tot = rep.aU + rep.aN + rep.tN + rep.gU;
+    FLASH = tot ? T('mergeRep').replace('{aU}', rep.aU).replace('{aN}', rep.aN).replace('{tN}', rep.tN).replace('{gU}', rep.gU) : T('mergeNo');
+    render();
+  };
+  r.readAsArrayBuffer(f);
+  ev.target.value = '';
+}
+
+/* ---------------- boot ---------------- */
+function setLang(l) {
+  LANG = l;
+  byId('lang-it').classList.toggle('on', l === 'it');
+  byId('lang-en').classList.toggle('on', l === 'en');
+  document.documentElement.lang = l;
+  render();
+}
+function boot() {
+  captureBodySrc();
+  tryLoad();
+  byId('impfile').addEventListener('change', importJSON);
+  byId('mrgfile').addEventListener('change', mergeFile);
+  window.addEventListener('beforeunload', function (e) { if (DIRTY && !ART) { e.preventDefault(); e.returnValue = ''; } });
+  render();
+  /* Se la pagina è pubblicata su claude.ai, attiva il salvataggio condiviso (publish) e l'export file. */
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('artifact').then(function (a) { if (a) { ART = a; render(); } });
+      window.claude.use('downloads').then(function (d) { if (d) DL = d; });
+    }
+  } catch (e) {}
+}
+
+/* ---------------- finestre di dialogo in pagina (sostituiscono alert/confirm/prompt) ---------------- */
+function tdDialog(msg, opts) {
+  var old = byId('tddlg'); if (old) old.remove();
+  var d = document.createElement('div'); d.className = 'modal show'; d.id = 'tddlg';
+  d.innerHTML = '<div class="mbox"><div class="mrow" style="white-space:pre-wrap">' + esc(msg) + '</div>' +
+    (opts.input ? '<div class="mrow"><div class="fld"><input id="tddlg_in" autocomplete="off"></div></div>' : '') +
+    '<div class="mrow" style="display:flex;gap:8px;justify-content:flex-end">' +
+    (opts.cancel ? '<button class="btn ghost" id="tddlg_c">' + esc(T('dlgCancel')) + '</button>' : '') +
+    '<button class="btn canary" id="tddlg_ok">' + esc(opts.okLabel || T('dlgOk')) + '</button></div></div>';
+  document.body.appendChild(d);
+  var close = function () { d.remove(); };
+  var ok = function () { var v = opts.input ? (byId('tddlg_in').value || '').trim() : true; close(); if (opts.onOk) opts.onOk(v); };
+  byId('tddlg_ok').onclick = ok;
+  if (opts.cancel) byId('tddlg_c').onclick = function () { close(); if (opts.onCancel) opts.onCancel(); };
+  if (opts.input) { var inp = byId('tddlg_in'); inp.focus(); inp.onkeydown = function (ev) { if (ev.key === 'Enter') ok(); if (ev.key === 'Escape') { close(); if (opts.onCancel) opts.onCancel(); } }; }
+  else byId('tddlg_ok').focus();
+}
+function tdAlert(msg) { tdDialog(msg, {}); }
+function tdConfirm(msg, onOk, onCancel) { tdDialog(msg, { cancel: true, okLabel: T('dlgConfirm'), onOk: onOk, onCancel: onCancel }); }
+function tdPrompt(msg, onOk) { tdDialog(msg, { cancel: true, input: true, onOk: onOk }); }
+var _render0 = render;
+render = function () { _render0(); refreshOwnlist(); };
+boot();
+
+</script>
+</body></html>
