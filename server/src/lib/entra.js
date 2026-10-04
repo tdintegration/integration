@@ -7,7 +7,8 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { config } from '../config.js';
 
 const AUTH_BASE = 'https://login.microsoftonline.com';
-const authority = () => `${AUTH_BASE}/${config.entra.authority}/v2.0`;
+// Endpoint OAuth2 v2.0 (authorize/token): .../oauth2/v2.0/...; l'issuer degli ID token è invece https://login.microsoftonline.com/{tid}/v2.0
+const oauth = () => `${AUTH_BASE}/${config.entra.authority}/oauth2/v2.0`;
 let JWKS = null;
 const jwks = () => (JWKS ||= createRemoteJWKSet(new URL(`${AUTH_BASE}/${config.entra.authority}/discovery/v2.0/keys`)));
 
@@ -30,7 +31,7 @@ export function beginLogin() {
     code_challenge_method: 'S256',
     prompt: 'select_account',
   });
-  return { url: `${authority()}/authorize?${p}`, state, nonce, verifier };
+  return { url: `${oauth()}/authorize?${p}`, state, nonce, verifier };
 }
 
 export async function completeLogin({ code, verifier, nonce }) {
@@ -42,7 +43,7 @@ export async function completeLogin({ code, verifier, nonce }) {
     redirect_uri: redirectUri(),
     code_verifier: verifier,
   });
-  const res = await fetch(`${authority()}/token`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+  const res = await fetch(`${oauth()}/token`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
   const tok = await res.json();
   if (!res.ok || !tok.id_token) throw new Error(`token endpoint: ${tok.error_description || tok.error || res.status}`);
   // 1) firma + audience; l'issuer viene controllato dopo, contro il tenant del token
